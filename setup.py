@@ -6,13 +6,13 @@ from publications import __version__
 setup(
 	name='django-publications',
 	version=__version__,
-	author='Lucas Theis',
-	author_email='lucas@theis.io',
-	description='A Django app for managing scientific publications.',
+	author='dwinter based on Lucas Theis',
+	author_email='dwinter@mpiwg-berlin.mpg.de',
+	description='A Django app for managing scientific publications. (Zotero import version)',
 	url='https://github.com/lucastheis/django-publications',
 	packages=find_packages(),
 	include_package_data=True,
-	install_requires=('Django>=2.1.0', 'Pillow>=2.3.0'),
+	install_requires=('Django>=2.1.0', 'Pillow>=2.3.0','django-filer'),
 	zip_safe=False,
 	license='MIT',
 	classifiers=(
