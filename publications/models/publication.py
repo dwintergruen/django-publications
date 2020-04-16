@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from publications.models.creator import Creator
 
 __license__ = 'MIT License <http://www.opensource.org/licenses/mit-license.php>'
 __author__ = 'Lucas Theis <lucas@theis.io>'
@@ -59,18 +60,21 @@ class Publication(models.Model):
 		}
 
 	type = models.ForeignKey(Type, on_delete=models.CASCADE)
+	zoterokey  = models.CharField(max_length=512,blank=True, null = True, help_text='Zotero key. Leave blank if unsure.')
 	citekey = models.CharField(max_length=512, blank=True, null=True,
 		help_text='BibTex citation key. Leave blank if unsure.')
 	title = models.CharField(max_length=512)
+	creators = models.ManyToManyField(Creator) ## added by dwinter
 	authors = models.CharField(max_length=2048,
 		help_text='List of authors separated by commas or <i>and</i>.')
-	year = models.PositiveIntegerField()
+	year = models.PositiveIntegerField(default=0) ##default set to 0 DW
 	month = models.IntegerField(choices=MONTH_CHOICES, blank=True, null=True)
+	date = models.CharField(max_length=256, blank=True) ## Charfield with date
 	journal = models.CharField(max_length=256, blank=True)
 	book_title = models.CharField(max_length=256, blank=True)
 	publisher = models.CharField(max_length=256, blank=True)
 	institution = models.CharField(max_length=256, blank=True)
-	volume = models.IntegerField(blank=True, null=True)
+	volume = models.CharField(max_length=256,blank=True, null=True) ##Changed this to Character from Integer
 	number = models.IntegerField(blank=True, null=True, verbose_name='Issue number')
 	pages = PagesField(max_length=32, blank=True)
 	note = models.CharField(max_length=256, blank=True)
@@ -90,6 +94,10 @@ class Publication(models.Model):
 	isbn = models.CharField(max_length=32, verbose_name="ISBN", blank=True,
 		help_text='Only for a book.') # A-B-C-D
 	lists = models.ManyToManyField(List, blank=True)
+
+	## specical for artwork should define a subclasss
+	artworkMedium = models.CharField(max_length=2024,default="")
+	artworkSize = models.CharField(max_length=1024,default="")
 
 	def __init__(self, *args, **kwargs):
 		models.Model.__init__(self, *args, **kwargs)

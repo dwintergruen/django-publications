@@ -13,6 +13,9 @@ class Type(OrderedModel):
 
 	type = models.CharField(max_length=128)
 	description = models.CharField(max_length=128)
+	zotero_types =  models.CharField(max_length=256, default='',
+			verbose_name='zotero type',
+			help_text='Possible Zotero types, separated by comma.')
 	bibtex_types = models.CharField(max_length=256, default='article',
 			verbose_name='BibTex types',
 			help_text='Possible BibTex types, separated by comma.')

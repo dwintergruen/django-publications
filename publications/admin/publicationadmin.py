@@ -1,3 +1,5 @@
+from publications.models.attachment import ImageAttachment, PDFAttachment
+
 __license__ = 'MIT License <http://www.opensource.org/licenses/mit-license.php>'
 __author__ = 'Lucas Theis <lucas@theis.io>'
 __docformat__ = 'epytext'
@@ -22,6 +24,15 @@ class CustomFileInline(admin.StackedInline):
 	extra = 1
 	max_num = 5
 
+class ImageAttachmentInline(admin.StackedInline):
+	model = ImageAttachment
+	extra = 1
+	max_num = 5
+
+class PDFAttachmentInline(admin.StackedInline):
+	model = PDFAttachment
+	extra = 1
+	max_num = 5
 
 class PublicationAdmin(admin.ModelAdmin):
 	list_display = ('type', 'first_author', 'title', 'type', 'year', 'journal_or_book_title')
@@ -42,7 +53,7 @@ class PublicationAdmin(admin.ModelAdmin):
 		(None, {'fields':
 			('lists',)}),
 	)
-	inlines = [CustomLinkInline, CustomFileInline]
+	inlines = [ImageAttachmentInline,PDFAttachmentInline,CustomLinkInline, CustomFileInline]
 
 	def get_urls(self):
 		return [
