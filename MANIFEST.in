@@ -2,3 +2,4 @@ include README.md
 recursive-include publications/templates *
 recursive-include publications/fixtures *
 recursive-include publications/static *
+recursive-include publications/management *
