@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from publications.models.creator import Creator
+from publications.models.tag import Tag
 
 __license__ = 'MIT License <http://www.opensource.org/licenses/mit-license.php>'
 __author__ = 'Lucas Theis <lucas@theis.io>'
@@ -94,6 +95,7 @@ class Publication(models.Model):
 	isbn = models.CharField(max_length=32, verbose_name="ISBN", blank=True,
 		help_text='Only for a book.') # A-B-C-D
 	lists = models.ManyToManyField(List, blank=True)
+	tags = models.ManyToManyField(Tag,blank=True)
 
 	## specical for artwork should define a subclasss
 	artworkMedium = models.CharField(max_length=2024,default="")

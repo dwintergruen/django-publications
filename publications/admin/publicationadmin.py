@@ -1,4 +1,5 @@
 from publications.models.attachment import ImageAttachment, PDFAttachment
+from publications.models.tag import Tag
 
 __license__ = 'MIT License <http://www.opensource.org/licenses/mit-license.php>'
 __author__ = 'Lucas Theis <lucas@theis.io>'
@@ -34,6 +35,7 @@ class PDFAttachmentInline(admin.StackedInline):
 	extra = 1
 	max_num = 5
 
+
 class PublicationAdmin(admin.ModelAdmin):
 	list_display = ('type', 'first_author', 'title', 'type', 'year', 'journal_or_book_title')
 	list_display_links = ('title',)
@@ -41,7 +43,7 @@ class PublicationAdmin(admin.ModelAdmin):
 	search_fields = ('title', 'journal', 'authors', 'keywords', 'year')
 	fieldsets = (
 		(None, {'fields':
-			('type', 'title', 'authors', 'year', 'month')}),
+			('type', 'title', 'authors', 'year', 'month',"tags")}),
 		(None, {'fields':
 			('journal', 'book_title', 'publisher', 'institution', 'volume', 'number', 'pages')}),
 		(None, {'fields':

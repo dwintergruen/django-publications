@@ -17,7 +17,7 @@ from .orderedmodeladmin import OrderedModelAdmin
 
 admin.site.register(Type, TypeAdmin)
 admin.site.register(List, ListAdmin)
-admin.site.register(Publication, PublicationAdmin)
+admin.site.register(Publication,PublicationAdmin)
 admin.site.register(Creator)
 admin.site.register(Archive)
 admin.site.register(Person)
@@ -26,6 +26,7 @@ admin.site.register(Tag)
 admin.site.register(Collection)
 admin.site.register(ImageAttachment)
 admin.site.register(PDFAttachment)
+
 
 
 
