@@ -128,7 +128,7 @@ class Command(BaseCommand):
             else:
                 print(f"not importing: {ct}")
 
-    def createAuthors(self,creators):
+    def createCreators(self,creators):
         """ deals with
         [{'creatorType': 'author',
         'firstName': 'Francesco',
@@ -181,7 +181,7 @@ class Command(BaseCommand):
                     break
 
             if type_known:
-                authors = self.createAuthors(data["creators"])
+                creators = self.createCreators(data["creators"])
                 archive = self.createArchive(data.get("archive",""))
                 # month,year = self.getMonth_Year(data["date"])
                 tags = self.createTags(data["tags"])
@@ -190,7 +190,7 @@ class Command(BaseCommand):
                     type_id=types[typ],
                     #citekey=data['key'],
                     title=data['title'],
-                    authors=authors,
+                    creators=creators,
                     #year=year,
                     date=data["date"],
                     #month=month,
