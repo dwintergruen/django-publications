@@ -1,4 +1,6 @@
+from publications.models.archive import Archive
 from publications.models.attachment import ImageAttachment, PDFAttachment
+from publications.models.creator import Creator, Role
 from publications.models.tag import Tag
 
 __license__ = 'MIT License <http://www.opensource.org/licenses/mit-license.php>'
@@ -13,6 +15,11 @@ except ImportError:
 from publications.models import CustomLink, CustomFile
 
 import publications.admin_views
+
+
+class ArchiveInline(admin.StackedInline):
+	model = Archive
+	extra= 1
 
 class CustomLinkInline(admin.StackedInline):
 	model = CustomLink
@@ -36,6 +43,24 @@ class PDFAttachmentInline(admin.StackedInline):
 	max_num = 5
 
 
+class RoleInline(admin.StackedInline):
+	model = Role
+	extra = 1
+	max_num = 5
+
+class PersonInline(admin.StackedInline):
+	model = Role
+	extra = 1
+	max_num = 5
+
+
+class CreatorsInline(admin.StackedInline):
+	model = Creator
+	extra = 1
+	max_num = 5
+	inlines = [PersonInline,RoleInline],
+
+
 class PublicationAdmin(admin.ModelAdmin):
 	list_display = ('type', 'first_author', 'title', 'type', 'year', 'journal_or_book_title')
 	list_display_links = ('title',)
@@ -43,9 +68,9 @@ class PublicationAdmin(admin.ModelAdmin):
 	search_fields = ('title', 'journal', 'authors', 'keywords', 'year')
 	fieldsets = (
 		(None, {'fields':
-			('type', 'title', 'authors', 'year', 'month',"tags")}),
+			('type', 'title', 'authors', 'creators','date','year', 'month',"tags","callNumber", "archive")}),
 		(None, {'fields':
-			('journal', 'book_title', 'publisher', 'institution', 'volume', 'number', 'pages')}),
+			('journal', 'book_title', 'publisher', 'place', 'institution', 'volume', 'number', 'pages',"rights")}),
 		(None, {'fields':
 			('citekey', 'keywords', 'url', 'code', 'pdf', 'doi', 'isbn', 'note', 'external')}),
 		(None, {'fields':
@@ -55,7 +80,9 @@ class PublicationAdmin(admin.ModelAdmin):
 		(None, {'fields':
 			('lists',)}),
 	)
-	inlines = [ImageAttachmentInline,PDFAttachmentInline,CustomLinkInline, CustomFileInline]
+	inlines = [ImageAttachmentInline,PDFAttachmentInline,CustomLinkInline,
+			   CustomFileInline
+			   ]
 
 	def get_urls(self):
 		return [

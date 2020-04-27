@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from publications.models.archive import Archive
 from publications.models.creator import Creator
+from publications.models.place import Place
 from publications.models.tag import Tag
 
 __license__ = 'MIT License <http://www.opensource.org/licenses/mit-license.php>'
@@ -98,10 +100,14 @@ class Publication(models.Model):
 		help_text='Only for a book.') # A-B-C-D
 	lists = models.ManyToManyField(List, blank=True)
 	tags = models.ManyToManyField(Tag,blank=True)
+	archive = models.ForeignKey(Archive,null=True,on_delete=models.SET_NULL)
 
 	## specical for artwork should define a subclasss
 	artworkMedium = models.CharField(max_length=2024,default="")
 	artworkSize = models.CharField(max_length=1024,default="")
+	place = models.ForeignKey(Place,null=True,on_delete=models.SET_NULL)
+	callNumber =  models.CharField(max_length=3000,default="")
+	rights = models.CharField(max_length=3000, default="")
 
 	def __init__(self, *args, **kwargs):
 		models.Model.__init__(self, *args, **kwargs)

@@ -9,6 +9,7 @@ from publications.models.archive import Archive
 from publications.models.attachment import ImageAttachment, PDFAttachment
 from publications.models.collection import Collection
 from publications.models.creator import Role,Person, Creator
+from publications.models.place import Place
 from publications.models.tag import Tag
 import io
 import os.path
@@ -87,7 +88,7 @@ class Command(BaseCommand):
                 if not always_upload: #don't save the new object if we have already a files with the same sha
                     try:
 
-                        obj_old = New_cls.objects.get(sha1 = sha1_neu).exclude(pk=new_obj.pk) #same object exists already
+                        obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
                         new_obj.delete()
                         del new_obj
                         new_obj = obj_old
@@ -100,13 +101,15 @@ class Command(BaseCommand):
 
                     except New_cls.MultipleObjectsReturned:
                         logger.warning("Objects exists more than once")
-                        images_old = New_cls.objects.filter(sha1=sha1_neu).exclude(pk=new_obj.pk)
+                        images_old = New_cls.objects.filter(sha1=sha1_neu).exclude(id=new_obj.id)
                         for i in images_old:
                             logger.warning(i.label)
                         logger.warning(f"I choose the first!")
                         new_obj.delete()
                         del new_obj
                         new_obj = images_old[0]
+                        fld = Folder.objects.get(name=folder_name)
+                        new_obj.folder = fld
                 else: #always_upload
 
                     fld = Folder.objects.get(name=folder_name)
@@ -151,10 +154,15 @@ class Command(BaseCommand):
             ret.append(creator)
         return ret
 
-    def createArchive(self,archive):
+    def createArchive(self,data):
+        archive = data["archive"]
+        location = data["archiveLocation"]
+
         if archive.strip() == "":
             return None
-        archive,created = Archive.objects.get_or_create(name = archive)
+
+        location_obj,created = Place.objects.get_or_create(name = location)
+        archive,created = Archive.objects.get_or_create(name = archive, location = location_obj)
         return archive
 
     def createTags(self,tags):
@@ -164,6 +172,12 @@ class Command(BaseCommand):
             ret.append(tag)
         return ret
 
+
+    def createPlace(self,place):
+        if place:
+            place,created = Place.objects.get_or_create(name=place)
+            return place
+        return None
 
     def import_bibl_items(self,items):
         cnt = 0
@@ -183,7 +197,9 @@ class Command(BaseCommand):
 
             if type_known:
                 creators = self.createCreators(data["creators"])
-                archive = self.createArchive(data.get("archive",""))
+                archive = self.createArchive(data)
+
+                place = self.createPlace(data.get("place",""))
                 # month,year = self.getMonth_Year(data["date"])
                 tags = self.createTags(data["tags"])
 
@@ -212,7 +228,9 @@ class Command(BaseCommand):
                     rights=data["rights"],
                     extra=data["extra"],
                     dateAdded = data["dateAdded"],
-                    dateModified = data["dateModified"]
+                    dateModified = data["dateModified"],
+                    place = place,
+
                 )
 
 

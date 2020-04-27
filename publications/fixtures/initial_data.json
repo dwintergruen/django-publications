@@ -7,6 +7,7 @@
 			"type": "Journal",
 			"description": "Journal Articles",
 			"bibtex_types": "article",
+			"zotero_types" : "journalArticle",
 			"hidden": 0
 		}
 	},
@@ -18,6 +19,7 @@
 			"type": "Conference",
 			"description": "Conference Papers",
 			"bibtex_types": "inproceedings, conference, incollection",
+			"zotero_types": "conferencePaper",
 			"hidden": 0
 		}
 	},
@@ -29,6 +31,7 @@
 			"type": "Technical Report",
 			"description": "Technical Reports",
 			"bibtex_types": "techreport",
+			"zotero_types" : "report",
 			"hidden": 0
 		}
 	},
@@ -39,6 +42,7 @@
 			"order": 3,
 			"type": "Book",
 			"description": "Books",
+			"zotero_types" : "book",
 			"bibtex_types": "book, manual",
 			"hidden": 0
 		}
@@ -51,6 +55,7 @@
 			"type": "Book Chapter",
 			"description": "Book Chapters",
 			"bibtex_types": "inbook",
+			"zotero_types" : "bookSection",
 			"hidden": 0
 		}
 	},
@@ -95,6 +100,18 @@
 			"type": "Patent",
 			"description": "Patents",
 			"bibtex_types": "patent,misc",
+			"hidden": 1
+		}
+	},
+	{
+	"model": "publications.type",
+	"pk": 10,
+		"fields": {
+			"order": 8,
+			"type": "Manuscript",
+			"description": "Manuscript",
+			"bibtex_types": "manuscript",
+			"zotero_types": "manuscript",
 			"hidden": 1
 		}
 	},
