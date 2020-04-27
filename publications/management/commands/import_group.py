@@ -263,7 +263,7 @@ class Command(BaseCommand):
         overwrite = options["always_upload"]
         zot = zotero.Zotero(library_id,"group",api_key)
 
-        items = zot.items()
+        items = zot.everything(zot.items())
         imported = self.import_bibl_items(items)
         #self.import_notes(items)
         self.import_attachment(zot, items, parent_id_as_fn=key_as_filename, always_upload=overwrite)
