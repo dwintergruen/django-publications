@@ -81,9 +81,11 @@ class Publication(models.Model):
 	note = models.CharField(max_length=256, blank=True)
 	keywords = models.CharField(max_length=256, blank=True,
 		help_text='List of keywords separated by commas.')
-	url = models.URLField(blank=True, verbose_name='URL',
+	url = models.URLField(blank=True,
+						  max_length=5000,
+						  verbose_name='URL',
 		help_text='Link to PDF or journal page.')
-	code = models.URLField(blank=True,
+	code = models.URLField(blank=True, max_length=5000,
 		help_text='Link to page with code.')
 	pdf = models.FileField(upload_to='publications/', verbose_name='PDF', blank=True, null=True)
 	image = models.ImageField(upload_to='publications/images/', blank=True, null=True)
