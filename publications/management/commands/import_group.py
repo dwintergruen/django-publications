@@ -20,13 +20,16 @@ class Command(BaseCommand):
 
     def import_attachment(self, zot, items,
                           parent_id_as_fn=False,
-                          always_upload=False):
+                          always_upload=False,
+                          check_only_filename=False):
         """
 
         :param zot:
         :param items:
         :param parent_id_as_fn: defaults to false, normally the opriginal filename is used as filename in django storage if true then it uses the id of the parent.
         :param always_upload: defaults to false, upload a file indepent if it already exits, use this if you want the same file with different names in the storage.
+        :param check_only_filename: defaults to false, if set don't check hash, just check if name already exists
+        speeds the process up because the file is not downloaded from the server.
         :return:
         """
         cnt = 0
@@ -60,17 +63,21 @@ class Command(BaseCommand):
                 filename = data["filename"]
                 parentItem = data["parentItem"]
 
-
-                bts = zot.file(key)
-                f = io.BytesIO(bts)
-                #file_obj._committed = False
-                #file_obj = open("/tmp/Francesco di Giorgio_Trattato di architettura e macchine_Ashburnham 361_f 25r_FACSIMILI del Museo Galileo.jpg","rb")
-
                 if parent_id_as_fn:
 
                     _name,ext = os.path.splitext(filename)
                     filename = parentItem + ext
 
+
+                if check_only_filename:
+                    try:
+                        obj_old = New_cls.objects.get(original_filename=filename)  # same object exists already
+                        continue
+                    except New_cls.DoesNotExist:
+                        pass
+
+                bts = zot.file(key)
+                f = io.BytesIO(bts)
                 file_obj = File(f,name = filename)
 
 
@@ -253,6 +260,8 @@ class Command(BaseCommand):
         parser.add_argument('api_key', type=str)
         parser.add_argument("--key_as_filename",default=False,const=True,nargs="?",help="if set then the filenames of the attachement will be the keys of the parent.")
         parser.add_argument("--always_upload",default=False,const=True,nargs="?",help="always upload the file, normally checks if file with same sha already exists.")
+        parser.add_argument("--check_only_filename", default=False, const=True, nargs="?",
+                        help="don't check sha1 just the filename for existance of a file.")
 
     def handle(self, *args, **options):
 
@@ -261,11 +270,15 @@ class Command(BaseCommand):
         api_key = options["api_key"]
         key_as_filename = options["key_as_filename"]
         overwrite = options["always_upload"]
+        check_only_filename = options["check_only_filename"]
+
         zot = zotero.Zotero(library_id,"group",api_key)
 
         items = zot.everything(zot.items())
         imported = self.import_bibl_items(items)
         #self.import_notes(items)
-        self.import_attachment(zot, items, parent_id_as_fn=key_as_filename, always_upload=overwrite)
+        self.import_attachment(zot, items, parent_id_as_fn=key_as_filename,
+                               always_upload=overwrite,
+                               check_only_filename=check_only_filename)
         self.import_collectionMetadata(zot)
         self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} items!'))
