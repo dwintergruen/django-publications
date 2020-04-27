@@ -277,7 +277,7 @@ class Command(BaseCommand):
         overwrite = options["always_upload"]
         check_only_filename = options["check_only_filename"]
         from_file = options["from_file"]
-        to_file = options["from_file"]
+        to_file = options["to_file"]
 
         zot = zotero.Zotero(library_id,"group",api_key)
 
