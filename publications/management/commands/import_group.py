@@ -291,7 +291,7 @@ class Command(BaseCommand):
         if to_file:
             import pickle
             with open(to_file, "wb") as outf:
-                pickle.load(items,outf)
+                pickle.dump(items,outf)
 
         imported = self.import_bibl_items(items)
         #self.import_notes(items)
