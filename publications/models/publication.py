@@ -64,21 +64,21 @@ class Publication(models.Model):
 	zoterokey  = models.CharField(max_length=512,blank=True, null = True, help_text='Zotero key. Leave blank if unsure.')
 	citekey = models.CharField(max_length=512, blank=True, null=True,
 		help_text='BibTex citation key. Leave blank if unsure.')
-	title = models.CharField(max_length=512)
+	title = models.CharField(max_length=10000)
 	creators = models.ManyToManyField(Creator) ## added by dwinter
-	authors = models.CharField(max_length=2048,
+	authors = models.CharField(max_length=10000,
 		help_text='List of authors separated by commas or <i>and</i>.')
 	year = models.PositiveIntegerField(default=0) ##default set to 0 DW
 	month = models.IntegerField(choices=MONTH_CHOICES, blank=True, null=True)
 	date = models.CharField(max_length=256, blank=True) ## Charfield with date
 	journal = models.CharField(max_length=256, blank=True)
-	book_title = models.CharField(max_length=256, blank=True)
+	book_title = models.CharField(max_length=10000, blank=True)
 	publisher = models.CharField(max_length=256, blank=True)
 	institution = models.CharField(max_length=256, blank=True)
 	volume = models.CharField(max_length=256,blank=True, null=True) ##Changed this to Character from Integer
 	number = models.IntegerField(blank=True, null=True, verbose_name='Issue number')
 	pages = PagesField(max_length=32, blank=True)
-	note = models.CharField(max_length=256, blank=True)
+	note = models.CharField(max_length=10000, blank=True)
 	keywords = models.CharField(max_length=256, blank=True,
 		help_text='List of keywords separated by commas.')
 	url = models.URLField(blank=True,
