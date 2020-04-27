@@ -68,7 +68,6 @@ class Command(BaseCommand):
                     _name,ext = os.path.splitext(filename)
                     filename = parentItem + ext
 
-
                 if check_only_filename:
                     try:
                         obj_old = New_cls.objects.get(original_filename=filename)  # same object exists already
@@ -262,6 +261,9 @@ class Command(BaseCommand):
         parser.add_argument("--always_upload",default=False,const=True,nargs="?",help="always upload the file, normally checks if file with same sha already exists.")
         parser.add_argument("--check_only_filename", default=False, const=True, nargs="?",
                         help="don't check sha1 just the filename for existance of a file.")
+        parser.add_argument("--from_file", default=None, help="filename, load file instead of getting docs from zoter server")
+        parser.add_argument("--to_file", default=None,
+                            help="filename, store file after loading data from zoter server, import with from file")
 
     def handle(self, *args, **options):
 
@@ -271,10 +273,23 @@ class Command(BaseCommand):
         key_as_filename = options["key_as_filename"]
         overwrite = options["always_upload"]
         check_only_filename = options["check_only_filename"]
+        from_file = options["from_file"]
+        to_file = options["from_file"]
 
         zot = zotero.Zotero(library_id,"group",api_key)
 
-        items = zot.everything(zot.items())
+        if from_file:
+            import pickle
+            with open(from_file,"rb") as inf:
+                items = pickle.load(inf)
+        else:
+            items = zot.everything(zot.items())
+
+        if to_file:
+            import pickle
+            with open(to_file, "wb") as outf:
+                pickle.load(items,outf)
+
         imported = self.import_bibl_items(items)
         #self.import_notes(items)
         self.import_attachment(zot, items, parent_id_as_fn=key_as_filename,
