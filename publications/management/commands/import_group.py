@@ -87,7 +87,7 @@ class Command(BaseCommand):
                 if not always_upload: #don't save the new object if we have already a files with the same sha
                     try:
 
-                        obj_old = New_cls.objects.get(sha1 = sha1_neu) #same object exists already
+                        obj_old = New_cls.objects.get(sha1 = sha1_neu).exclude(pk=new_obj.pk) #same object exists already
                         new_obj.delete()
                         del new_obj
                         new_obj = obj_old
@@ -100,7 +100,7 @@ class Command(BaseCommand):
 
                     except New_cls.MultipleObjectsReturned:
                         logger.warning("Objects exists more than once")
-                        images_old = New_cls.objects.filter(sha1=sha1_neu)
+                        images_old = New_cls.objects.filter(sha1=sha1_neu).exclude(pk=new_obj.pk)
                         for i in images_old:
                             logger.warning(i.label)
                         logger.warning(f"I choose the first!")
@@ -122,6 +122,7 @@ class Command(BaseCommand):
                     for t in tags:
                         attachment.tags.append(t)
                     #attachment.parent = Publication.objects.get_or_create(zoterokey=parentItem)
+                    new_obj.save()
                     attachment.save()
                 except Publication.DoesNotExist:
                     print(f"Parent Item {parentItem} has to exist attachement not created!")
@@ -190,7 +191,6 @@ class Command(BaseCommand):
                     type_id=types[typ],
                     #citekey=data['key'],
                     title=data['title'],
-                    creators=creators,
                     #year=year,
                     date=data["date"],
                     #month=month,
@@ -228,6 +228,9 @@ class Command(BaseCommand):
 
                 for tag in self.createTags(data.get("tags",[])):
                     obj.tags.add(tag)
+
+                for creator in creators:
+                    obj.creators.add(creator)
                 for c in data["collections"]:
                     collection,created = Collection.objects.get_or_create(zoterokey = c)
                     collection.items.add(obj)
