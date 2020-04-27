@@ -82,7 +82,7 @@ class Command(BaseCommand):
                     try:
 
                         obj_old = New_cls.objects.get(sha1 = sha1_neu) #same object exists already
-
+                        new_obj.delete()
                         del new_obj
                         new_obj = obj_old
                     except New_cls.DoesNotExist:
@@ -91,12 +91,14 @@ class Command(BaseCommand):
                         fld = Folder.objects.get(name=folder_name)
                         new_obj.folder = fld
                         new_obj.save()
+
                     except New_cls.MultipleObjectsReturned:
                         logger.warning("Objects exists more than once")
                         images_old = New_cls.objects.filter(sha1=sha1_neu)
                         for i in images_old:
                             logger.warning(i.label)
                         logger.warning(f"I choose the first!")
+                        new_obj.delete()
                         del new_obj
                         new_obj = images_old[0]
                 else: #always_upload
