@@ -61,8 +61,17 @@ class Command(BaseCommand):
 
             if obj_type:
 
-                filename = data["filename"]
-                parentItem = data["parentItem"]
+                filename = data.get("filename",None)
+
+                if not filename:
+                    logger.error(f"{key} has no filename. not imported!")
+                    continue
+
+                parentItem = data.get("parentItem",None)
+
+                if not parentItem:
+                    logger.error(f"{key} has no parent item. not imported!")
+                    continue
 
                 if parent_id_as_fn:
 
