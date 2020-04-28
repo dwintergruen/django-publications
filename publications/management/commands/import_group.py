@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from filer.models import Image, Folder
 from filer.models import File as Filer_File
 from pyzotero import zotero
-
+import pyzotero
 from publications.models import Type, publication, Publication
 from publications.models.archive import Archive
 from publications.models.attachment import ImageAttachment, PDFAttachment
@@ -85,7 +85,12 @@ class Command(BaseCommand):
                     except New_cls.DoesNotExist:
                         pass
 
-                bts = zot.file(key)
+                try:
+                    bts = zot.file(key)
+                except pyzotero.errors.ResourceNotFound:
+                    logger.error(f"ressource not found: {key} ")
+                    continue
+
                 f = io.BytesIO(bts)
                 file_obj = File(f,name = filename)
 
