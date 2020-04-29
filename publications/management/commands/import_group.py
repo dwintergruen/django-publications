@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from filer.models import Image, Folder
 from filer.models import File as Filer_File
 from pyzotero import zotero
-import pyzotero
+import pyzotero.zotero_errors
 from publications.models import Type, publication, Publication
 from publications.models.archive import Archive
 from publications.models.attachment import ImageAttachment, PDFAttachment
@@ -87,8 +87,8 @@ class Command(BaseCommand):
 
                 try:
                     bts = zot.file(key)
-                except pyzotero.errors.ResourceNotFound:
-                    logger.error(f"ressource not found: {key} ")
+                except pyzotero.zotero_errors.ResourceNotFound:
+                    logger.error(f"Ressource not found: {key} ")
                     continue
 
                 f = io.BytesIO(bts)
@@ -126,7 +126,7 @@ class Command(BaseCommand):
                         new_obj.folder = fld
                 else: #always_upload
 
-                    fld = Folder.objects.get(name=folder_name)
+                    fld,created = Folder.objects.get_or_create(name=folder_name)
                     new_obj.folder = fld
                     new_obj.save()
                 try:
@@ -183,7 +183,7 @@ class Command(BaseCommand):
         ret = []
         for tag in tags:
             tag,created = Tag.objects.get_or_create(name = tag["tag"])
-            ret.append(tag)
+            ret.add(tag)
         return ret
 
 
@@ -268,6 +268,8 @@ class Command(BaseCommand):
                     collection.items.add(obj)
                     collection.save()
                 cnt +=1
+            elif typ == "attachment":
+                pass # will deal later
             else:
                 self.stdout.write(f"{typ} not in types, not imported!")
         return cnt
@@ -299,6 +301,9 @@ class Command(BaseCommand):
         parser.add_argument("--from_file", default=None, help="filename, load file instead of getting docs from zoter server")
         parser.add_argument("--to_file", default=None,
                             help="filename, store file after loading data from zoter server, import with from file")
+        parser.add_argument("--only_attachments", default=False,
+                            const=True,nargs="?",
+                            help="import only attachements")
 
     def handle(self, *args, **options):
 
@@ -310,7 +315,7 @@ class Command(BaseCommand):
         check_only_filename = options["check_only_filename"]
         from_file = options["from_file"]
         to_file = options["to_file"]
-
+        only_attachments = options["only_attachments"]
         zot = zotero.Zotero(library_id,"group",api_key)
 
         if from_file:
@@ -325,7 +330,8 @@ class Command(BaseCommand):
             with open(to_file, "wb") as outf:
                 pickle.dump(items,outf)
 
-        imported = self.import_bibl_items(items)
+        if not only_attachments:
+            imported = self.import_bibl_items(items)
         #self.import_notes(items)
         self.import_attachment(zot, items, parent_id_as_fn=key_as_filename,
                                always_upload=overwrite,
