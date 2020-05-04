@@ -141,10 +141,12 @@ class Command(BaseCommand):
                     #attachment.parent = Publication.objects.get_or_create(zoterokey=parentItem)
                     new_obj.save()
                     attachment.save()
+                    cnt += 1
                 except Publication.DoesNotExist:
                     print(f"Parent Item {parentItem} has to exist attachement not created!")
             else:
                 print(f"not importing: {ct}")
+        return cnt
 
     def createCreators(self,creators):
         """ deals with
@@ -183,7 +185,7 @@ class Command(BaseCommand):
         ret = []
         for tag in tags:
             tag,created = Tag.objects.get_or_create(name = tag["tag"])
-            ret.add(tag)
+            ret.append(tag)
         return ret
 
 
@@ -277,6 +279,7 @@ class Command(BaseCommand):
 
     def import_collectionMetadata(self,zot):
         collections = zot.collections()
+        cnt = 0
         for collection in collections:
             data = collection["data"]
             zoterokey = data["key"]
@@ -289,6 +292,8 @@ class Command(BaseCommand):
                 parent,created = Collection.objects.get_or_create(zoterokey=zoterokey)
                 col.parent = parent
             col.save()
+            cnt += 1
+        return cnt
 
 
     def add_arguments(self, parser):
@@ -332,9 +337,16 @@ class Command(BaseCommand):
 
         if not only_attachments:
             imported = self.import_bibl_items(items)
+            self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} bibliographic items!'))
+        else:
+            self.stdout.write(f'Only attachments will be imported')
+
         #self.import_notes(items)
-        self.import_attachment(zot, items, parent_id_as_fn=key_as_filename,
+        imported = self.import_attachment(zot, items, parent_id_as_fn=key_as_filename,
                                always_upload=overwrite,
                                check_only_filename=check_only_filename)
-        self.import_collectionMetadata(zot)
-        self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} items!'))
+
+        self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} attachments!'))
+        imported = self.import_collectionMetadata(zot)
+        self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} collections!'))
+
