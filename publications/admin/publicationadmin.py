@@ -1,5 +1,5 @@
 from publications.models.archive import Archive
-from publications.models.attachment import ImageAttachment, PDFAttachment
+from publications.models.attachment import ImageAttachment, PDFAttachment, URLAttachment
 from publications.models.creator import Creator, Role
 from publications.models.tag import Tag
 
@@ -37,8 +37,14 @@ class ImageAttachmentInline(admin.StackedInline):
 	extra = 1
 	max_num = 5
 
+
 class PDFAttachmentInline(admin.StackedInline):
 	model = PDFAttachment
+	extra = 1
+	max_num = 5
+
+class URLAttachmentInline(admin.StackedInline):
+	model = URLAttachment
 	extra = 1
 	max_num = 5
 
