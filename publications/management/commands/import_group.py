@@ -21,13 +21,14 @@ class Command(BaseCommand):
 
     def import_attachment(self, zot, items,
                           parent_id_as_fn=False,
+                          attachment_id_as_fn=False,
                           always_upload=False,
                           check_only_filename=False):
         """
-
         :param zot:
         :param items:
         :param parent_id_as_fn: defaults to false, normally the opriginal filename is used as filename in django storage if true then it uses the id of the parent.
+        :param attachment_id_as_fn: defaults to false, normally the opriginal filename is used as filename in django storage if true then it uses the id of the parent.
         :param always_upload: defaults to false, upload a file indepent if it already exits, use this if you want the same file with different names in the storage.
         :param check_only_filename: defaults to false, if set don't check hash, just check if name already exists
         speeds the process up because the file is not downloaded from the server.
@@ -77,6 +78,11 @@ class Command(BaseCommand):
 
                     _name,ext = os.path.splitext(filename)
                     filename = parentItem + ext
+
+                if attachment_id_as_fn:
+
+                    _name,ext = os.path.splitext(filename)
+                    filename = key + ext
 
                 if check_only_filename:
                     try:
@@ -299,7 +305,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('library_id',  type=str)
         parser.add_argument('api_key', type=str)
-        parser.add_argument("--key_as_filename",default=False,const=True,nargs="?",help="if set then the filenames of the attachement will be the keys of the parent.")
+        parser.add_argument("--parent_key_as_filename",default=False,const=True,nargs="?",help="if set then the filenames of the attachement will be the keys of the parent.")
+        parser.add_argument("--attachment_key_as_filename", default=False, const=True, nargs="?",
+                            help="if set then the filenames of the attachement will be the keys of the attachment.")
         parser.add_argument("--always_upload",default=False,const=True,nargs="?",help="always upload the file, normally checks if file with same sha already exists.")
         parser.add_argument("--check_only_filename", default=False, const=True, nargs="?",
                         help="don't check sha1 just the filename for existance of a file.")
@@ -315,7 +323,8 @@ class Command(BaseCommand):
         logging.basicConfig(level=logging.DEBUG)
         library_id = options["library_id"]
         api_key = options["api_key"]
-        key_as_filename = options["key_as_filename"]
+        parent_key_as_filename = options["parent_key_as_filename"]
+        attachment_key_as_filename = options["attachment_key_as_filename"]
         overwrite = options["always_upload"]
         check_only_filename = options["check_only_filename"]
         from_file = options["from_file"]
@@ -323,6 +332,10 @@ class Command(BaseCommand):
         only_attachments = options["only_attachments"]
         zot = zotero.Zotero(library_id,"group",api_key)
 
+
+        if parent_key_as_filename and attachment_key_as_filename:
+            print("error you cannot set both patent_key and attachment_key!")
+            return
         if from_file:
             import pickle
             with open(from_file,"rb") as inf:
@@ -342,7 +355,8 @@ class Command(BaseCommand):
             self.stdout.write(f'Only attachments will be imported')
 
         #self.import_notes(items)
-        imported = self.import_attachment(zot, items, parent_id_as_fn=key_as_filename,
+        imported = self.import_attachment(zot, items, parent_id_as_fn=parent_key_as_filename,
+                                          attachmnt_id_as_fn=attachment_key_as_filename,
                                always_upload=overwrite,
                                check_only_filename=check_only_filename)
 
