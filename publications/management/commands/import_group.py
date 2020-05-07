@@ -87,6 +87,7 @@ class Command(BaseCommand):
                 if check_only_filename:
                     try:
                         obj_old = New_cls.objects.get(original_filename=filename)  # same object exists already
+                        logger.inf(f"{filename} already exist!")
                         continue
                     except New_cls.DoesNotExist:
                         pass
