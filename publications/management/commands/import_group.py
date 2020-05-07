@@ -357,7 +357,7 @@ class Command(BaseCommand):
 
         #self.import_notes(items)
         imported = self.import_attachment(zot, items, parent_id_as_fn=parent_key_as_filename,
-                                          attachmnt_id_as_fn=attachment_key_as_filename,
+                                          attachment_id_as_fn=attachment_key_as_filename,
                                always_upload=overwrite,
                                check_only_filename=check_only_filename)
 
