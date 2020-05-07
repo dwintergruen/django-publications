@@ -108,8 +108,10 @@ class Command(BaseCommand):
                 sha1_neu =  new_obj.sha1
                 if not always_upload: #don't save the new object if we have already a files with the same sha
                     try:
-
-                        obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
+                        if check_only_filename:
+                            obj_old = New_cls.objects.get(original_filename=filename)
+                        else:
+                            obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
                         new_obj.delete()
                         del new_obj
                         new_obj = obj_old
@@ -317,7 +319,7 @@ class Command(BaseCommand):
                             help="filename, store file after loading data from zoter server, import with from file")
         parser.add_argument("--only_attachments", default=False,
                             const=True,nargs="?",
-                            help="import only attachements")
+                            help="import only attachments")
 
     def handle(self, *args, **options):
 
