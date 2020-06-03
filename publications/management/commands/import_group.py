@@ -87,10 +87,16 @@ class Command(BaseCommand):
                 if check_only_filename:
                     try:
                         obj_old = New_cls.objects.get(original_filename=filename)  # same object exists already
-                        logger.inf(f"{filename} already exist!")
+                        logger.info(f"{filename} already exist!")
                         continue
                     except New_cls.DoesNotExist:
-                        pass
+                        try:
+                            New_cls.objects.get(original_filename=filename.lower())
+                            logger.info(f"{filename.lower()} already exist!")
+                            continue
+                        except:
+                            pass
+
 
                 try:
                     bts = zot.file(key)
@@ -310,7 +316,7 @@ class Command(BaseCommand):
         parser.add_argument('api_key', type=str)
         parser.add_argument("--parent_key_as_filename",default=False,const=True,nargs="?",help="if set then the filenames of the attachement will be the keys of the parent.")
         parser.add_argument("--attachment_key_as_filename", default=False, const=True, nargs="?",
-                            help="if set then the filenames of the attachement will be the keys of the attachment.")
+                            help="if set then the filenames of the attachment will be the keys of the attachment.")
         parser.add_argument("--always_upload",default=False,const=True,nargs="?",help="always upload the file, normally checks if file with same sha already exists.")
         parser.add_argument("--check_only_filename", default=False, const=True, nargs="?",
                         help="don't check sha1 just the filename for existance of a file.")
@@ -320,6 +326,9 @@ class Command(BaseCommand):
         parser.add_argument("--only_attachments", default=False,
                             const=True,nargs="?",
                             help="import only attachments")
+        parser.add_argument("--no_attachments", default=False,
+                            const=True, nargs="?",
+                            help="import no attachments")
 
     def handle(self, *args, **options):
 
@@ -358,12 +367,14 @@ class Command(BaseCommand):
             self.stdout.write(f'Only attachments will be imported')
 
         #self.import_notes(items)
-        imported = self.import_attachment(zot, items, parent_id_as_fn=parent_key_as_filename,
-                                          attachment_id_as_fn=attachment_key_as_filename,
-                               always_upload=overwrite,
-                               check_only_filename=check_only_filename)
 
-        self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} attachments!'))
+        if not options["no_attachments"]:
+            imported = self.import_attachment(zot, items, parent_id_as_fn=parent_key_as_filename,
+                                              attachment_id_as_fn=attachment_key_as_filename,
+                                   always_upload=overwrite,
+                                   check_only_filename=check_only_filename)
+
+            self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} attachments!'))
         imported = self.import_collectionMetadata(zot)
         self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} collections!'))
 

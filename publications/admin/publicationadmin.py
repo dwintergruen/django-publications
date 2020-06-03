@@ -60,11 +60,11 @@ class PersonInline(admin.StackedInline):
 	max_num = 5
 
 
-class CreatorsInline(admin.StackedInline):
-	model = Creator
-	extra = 1
-	max_num = 5
-	inlines = [PersonInline,RoleInline],
+#class CreatorsInline(admin.StackedInline):
+#	model = Creator
+#	extra = 1
+#	max_num = 5
+#	inlines = [PersonInline,RoleInline],
 
 
 class PublicationAdmin(admin.ModelAdmin):
@@ -74,11 +74,11 @@ class PublicationAdmin(admin.ModelAdmin):
 	search_fields = ('title', 'journal', 'authors', 'keywords', 'year')
 	fieldsets = (
 		(None, {'fields':
-			('type', 'title', 'authors', 'creators','date','year', 'month',"tags","callNumber", "archive")}),
+			('type', 'title', 'authors', 'date','year', 'month',"tags","callNumber", "archive")}),
 		(None, {'fields':
 			('journal', 'book_title', 'publisher', 'place', 'institution', 'volume', 'number', 'pages',"rights")}),
 		(None, {'fields':
-			('citekey', 'keywords', 'url', 'code', 'pdf', 'doi', 'isbn', 'note', 'external')}),
+			('citekey', 'keywords', 'url', 'code', 'pdf', 'doi', 'isbn', 'note', 'external','zoterokey')}),
 		(None, {'fields':
 			('abstract',)}),
 		(None, {'fields':
@@ -87,7 +87,7 @@ class PublicationAdmin(admin.ModelAdmin):
 			('lists',)}),
 	)
 	inlines = [ImageAttachmentInline,PDFAttachmentInline,CustomLinkInline,
-			   CustomFileInline
+			   CustomFileInline# ,CreatorsInline
 			   ]
 
 	def get_urls(self):
