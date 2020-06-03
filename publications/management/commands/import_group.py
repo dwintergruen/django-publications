@@ -23,7 +23,9 @@ class Command(BaseCommand):
                           parent_id_as_fn=False,
                           attachment_id_as_fn=False,
                           always_upload=False,
-                          check_only_filename=False):
+                          check_only_filename=False,
+                          no_upload = False,
+                          in_folder = None):
         """
         :param zot:
         :param items:
@@ -32,6 +34,7 @@ class Command(BaseCommand):
         :param always_upload: defaults to false, upload a file indepent if it already exits, use this if you want the same file with different names in the storage.
         :param check_only_filename: defaults to false, if set don't check hash, just check if name already exists
         speeds the process up because the file is not downloaded from the server.
+        :param in_folder: patho to folder to check if file already downloaded
         :return:
         """
         cnt = 0
@@ -86,7 +89,7 @@ class Command(BaseCommand):
 
                 if check_only_filename:
                     try:
-                        obj_old = New_cls.objects.get(original_filename=filename)  # same object exists already
+                        New_cls.objects.get(original_filename=filename)  # same object exists already
                         logger.info(f"{filename} already exist!")
                         continue
                     except New_cls.DoesNotExist:
@@ -99,53 +102,75 @@ class Command(BaseCommand):
 
 
                 try:
-                    bts = zot.file(key)
-                except pyzotero.zotero_errors.ResourceNotFound:
-                    logger.error(f"Ressource not found: {key} ")
+                    parent = Publication.objects.get(zoterokey=parentItem)
+                except Publication.DoesNotExist:
+                    print(f"Parent Item {parentItem} has to exist attachment not created!")
                     continue
 
-                f = io.BytesIO(bts)
-                file_obj = File(f,name = filename)
+                if no_upload:
+                    attachment, created = PDFAttachment.objects.get_or_create(zoterokey=key, parent=parent)
+                    attachment.save()
+
+                else:
+
+                    path = None
+                    if in_folder:
+                        path = os.path.join(in_folder, key) + ".pdf"
+                        if not os.path.exists(path):
+                            path = os.path.join(in_folder, key.lower()) + ".pdf"
+                            if not os.path.exists(path):
+                                path = None
+
+                    if path:
+                        f = open(path,"rb")
+                    else:
+                        try:
+                            bts = zot.file(key)
+                        except pyzotero.zotero_errors.ResourceNotFound:
+                            logger.error(f"Ressource not found: {key} ")
+                            continue
+                        f = io.BytesIO(bts)
+
+                    file_obj = File(f,name = filename)
 
 
-                new_obj = New_cls.objects.create(original_filename=filename,
-                                                 file=file_obj)
+                    new_obj = New_cls.objects.create(original_filename=filename,
+                                                     file=file_obj)
 
-                sha1_neu =  new_obj.sha1
-                if not always_upload: #don't save the new object if we have already a files with the same sha
-                    try:
-                        if check_only_filename:
-                            obj_old = New_cls.objects.get(original_filename=filename)
-                        else:
-                            obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
-                        new_obj.delete()
-                        del new_obj
-                        new_obj = obj_old
-                    except New_cls.DoesNotExist:
-                        logger.info("upload new image")
+                    sha1_neu =  new_obj.sha1
+                    if not always_upload: #don't save the new object if we have already a files with the same sha
+                        try:
+                            if check_only_filename:
+                                obj_old = New_cls.objects.get(original_filename=filename)
+                            else:
+                                obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
+                            new_obj.delete()
+                            del new_obj
+                            new_obj = obj_old
+                        except New_cls.DoesNotExist:
+                            logger.info("upload new image")
 
-                        fld = Folder.objects.get(name=folder_name)
+                            fld = Folder.objects.get(name=folder_name)
+                            new_obj.folder = fld
+                            new_obj.save()
+
+                        except New_cls.MultipleObjectsReturned:
+                            logger.warning("Objects exists more than once")
+                            images_old = New_cls.objects.filter(sha1=sha1_neu).exclude(id=new_obj.id)
+                            for i in images_old:
+                                logger.warning(i.label)
+                            logger.warning(f"I choose the first!")
+                            new_obj.delete()
+                            del new_obj
+                            new_obj = images_old[0]
+                            fld = Folder.objects.get(name=folder_name)
+                            new_obj.folder = fld
+                    else: #always_upload
+
+                        fld,created = Folder.objects.get_or_create(name=folder_name)
                         new_obj.folder = fld
                         new_obj.save()
 
-                    except New_cls.MultipleObjectsReturned:
-                        logger.warning("Objects exists more than once")
-                        images_old = New_cls.objects.filter(sha1=sha1_neu).exclude(id=new_obj.id)
-                        for i in images_old:
-                            logger.warning(i.label)
-                        logger.warning(f"I choose the first!")
-                        new_obj.delete()
-                        del new_obj
-                        new_obj = images_old[0]
-                        fld = Folder.objects.get(name=folder_name)
-                        new_obj.folder = fld
-                else: #always_upload
-
-                    fld,created = Folder.objects.get_or_create(name=folder_name)
-                    new_obj.folder = fld
-                    new_obj.save()
-                try:
-                    parent = Publication.objects.get(zoterokey=parentItem)
                     if obj_type == "image":
                         attachment,created = ImageAttachment.objects.get_or_create(zoterokey=key, parent= parent)
                     else:
@@ -157,8 +182,7 @@ class Command(BaseCommand):
                     new_obj.save()
                     attachment.save()
                     cnt += 1
-                except Publication.DoesNotExist:
-                    print(f"Parent Item {parentItem} has to exist attachement not created!")
+
             else:
                 print(f"not importing: {ct}")
         return cnt
@@ -210,7 +234,7 @@ class Command(BaseCommand):
             return place
         return None
 
-    def import_bibl_items(self,items):
+    def import_bibl_items(self,items, max_no_import= None):
         cnt = 0
         # publication types
         types = {t.zotero_types:t.id for t in Type.objects.all()}
@@ -285,6 +309,8 @@ class Command(BaseCommand):
                     collection.items.add(obj)
                     collection.save()
                 cnt +=1
+
+
             elif typ == "attachment":
                 pass # will deal later
             else:
@@ -314,13 +340,15 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('library_id',  type=str)
         parser.add_argument('api_key', type=str)
-        parser.add_argument("--parent_key_as_filename",default=False,const=True,nargs="?",help="if set then the filenames of the attachement will be the keys of the parent.")
+        parser.add_argument("--parent_key_as_filename",default=False,const=True,nargs="?",help="if set then the filenames of the attachment will be the keys of the parent.")
         parser.add_argument("--attachment_key_as_filename", default=False, const=True, nargs="?",
                             help="if set then the filenames of the attachment will be the keys of the attachment.")
         parser.add_argument("--always_upload",default=False,const=True,nargs="?",help="always upload the file, normally checks if file with same sha already exists.")
         parser.add_argument("--check_only_filename", default=False, const=True, nargs="?",
                         help="don't check sha1 just the filename for existance of a file.")
         parser.add_argument("--from_file", default=None, help="filename, load file instead of getting docs from zoter server")
+        parser.add_argument("--from_folder", default=None,
+                            help="folder where downloaded pdfs with key.pdf as name are already stored.")
         parser.add_argument("--to_file", default=None,
                             help="filename, store file after loading data from zoter server, import with from file")
         parser.add_argument("--only_attachments", default=False,
@@ -329,6 +357,12 @@ class Command(BaseCommand):
         parser.add_argument("--no_attachments", default=False,
                             const=True, nargs="?",
                             help="import no attachments")
+
+        parser.add_argument("--no_upload", default=False,
+                            const=True, nargs="?",
+                            help="add attachment but no file upload")
+
+        parser.add_argument("--max_no_import", default=None, type=int)
 
     def handle(self, *args, **options):
 
@@ -353,7 +387,10 @@ class Command(BaseCommand):
             with open(from_file,"rb") as inf:
                 items = pickle.load(inf)
         else:
-            items = zot.everything(zot.items())
+            if options["max_no_import"]:
+                items = list(zot.items())[0:options["max_no_import"]]
+            else:
+                items = zot.everything(zot.items())
 
         if to_file:
             import pickle
@@ -372,7 +409,10 @@ class Command(BaseCommand):
             imported = self.import_attachment(zot, items, parent_id_as_fn=parent_key_as_filename,
                                               attachment_id_as_fn=attachment_key_as_filename,
                                    always_upload=overwrite,
-                                   check_only_filename=check_only_filename)
+                                   check_only_filename=check_only_filename,
+                                              no_upload=options["no_upload"],
+                                              in_folder = options["from_folder"]
+                                            )
 
             self.stdout.write(self.style.SUCCESS(f'Successfully imported {imported} attachments!'))
         imported = self.import_collectionMetadata(zot)

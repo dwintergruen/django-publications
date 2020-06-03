@@ -23,7 +23,7 @@ class PDFAttachment(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
-        return str(self.file)
+        return str(self.file) + "_" + self.zoterokey
 
 
 class URLAttachment(models.Model):
