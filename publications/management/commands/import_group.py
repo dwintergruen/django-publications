@@ -87,11 +87,12 @@ class Command(BaseCommand):
                     _name,ext = os.path.splitext(filename)
                     filename = key + ext
 
+                new_obj = None
                 if check_only_filename:
                     try:
-                        New_cls.objects.get(original_filename=filename)  # same object exists already
+                        new_obj = New_cls.objects.get(original_filename=filename)  # same object exists already
                         logger.info(f"{filename} already exist!")
-                        continue
+
                     except New_cls.DoesNotExist:
                         try:
                             New_cls.objects.get(original_filename=filename.lower())
@@ -100,10 +101,9 @@ class Command(BaseCommand):
                         except:
                             pass
                     except New_cls.MultipleObjectsReturned:
-                        logger.info(f"{filename} exist more than once!")
-                        logger.info(f"Cannot decide what's correct so will check also sha!")
-
-
+                        logger.error(f"{filename} exist more than once!")
+                        logger.error(f"I choose the first!")
+                        new_obj=New_cls.objects.filter(original_filename=filename)[0]
 
                 try:
                     parent = Publication.objects.get(zoterokey=parentItem)
@@ -116,61 +116,60 @@ class Command(BaseCommand):
                     attachment.save()
 
                 else:
-
-                    path = None
-                    if in_folder:
-                        path = os.path.join(in_folder, key) + ".pdf"
-                        if not os.path.exists(path):
-                            path = os.path.join(in_folder, key.lower()) + ".pdf"
+                    if not new_obj: #haven'T found a file already above
+                        path = None
+                        if in_folder:
+                            path = os.path.join(in_folder, key) + ".pdf"
                             if not os.path.exists(path):
-                                path = None
+                                path = os.path.join(in_folder, key.lower()) + ".pdf"
+                                if not os.path.exists(path):
+                                    path = None
 
-                    if path:
-                        f = open(path,"rb")
-                    else:
-                        try:
-                            bts = zot.file(key)
-                        except pyzotero.zotero_errors.ResourceNotFound:
-                            logger.error(f"Ressource not found: {key} ")
-                            continue
-                        f = io.BytesIO(bts)
+                        if path:
+                            f = open(path,"rb")
+                        else:
+                            try:
+                                bts = zot.file(key)
+                            except pyzotero.zotero_errors.ResourceNotFound:
+                                logger.error(f"Ressource not found: {key} ")
+                                continue
+                            f = io.BytesIO(bts)
 
-                    file_obj = File(f,name = filename)
+                        file_obj = File(f,name = filename)
 
 
-                    new_obj = New_cls.objects.create(original_filename=filename,
-                                                     file=file_obj)
+                        new_obj = New_cls.objects.create(original_filename=filename,
+                                                         file=file_obj)
 
-                    sha1_neu =  new_obj.sha1
-                    if not always_upload: #don't save the new object if we have already a files with the same sha
-                        try:
-                            obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
-                            new_obj.delete()
-                            del new_obj
-                            new_obj = obj_old
-                        except New_cls.DoesNotExist:
-                            logger.info("upload new image")
+                        sha1_neu =  new_obj.sha1
+                        if not always_upload: #don't save the new object if we have already a files with the same sha
+                            try:
+                                obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
+                                new_obj.delete()
+                                del new_obj
+                                new_obj = obj_old
+                            except New_cls.DoesNotExist:
+                                logger.info("upload new image")
 
-                            fld = Folder.objects.get(name=folder_name)
+                                fld = Folder.objects.get(name=folder_name)
+                                new_obj.folder = fld
+                                new_obj.save()
+
+                            except New_cls.MultipleObjectsReturned:
+                                logger.warning("Objects exists more than once")
+                                images_old = New_cls.objects.filter(sha1=sha1_neu).exclude(id=new_obj.id)
+                                for i in images_old:
+                                    logger.warning(i.label)
+                                logger.warning(f"I choose the first!")
+                                new_obj.delete()
+                                del new_obj
+                                new_obj = images_old[0]
+                                fld = Folder.objects.get(name=folder_name)
+                                new_obj.folder = fld
+                        else: #always_upload
+                            fld,created = Folder.objects.get_or_create(name=folder_name)
                             new_obj.folder = fld
                             new_obj.save()
-
-                        except New_cls.MultipleObjectsReturned:
-                            logger.warning("Objects exists more than once")
-                            images_old = New_cls.objects.filter(sha1=sha1_neu).exclude(id=new_obj.id)
-                            for i in images_old:
-                                logger.warning(i.label)
-                            logger.warning(f"I choose the first!")
-                            new_obj.delete()
-                            del new_obj
-                            new_obj = images_old[0]
-                            fld = Folder.objects.get(name=folder_name)
-                            new_obj.folder = fld
-                    else: #always_upload
-
-                        fld,created = Folder.objects.get_or_create(name=folder_name)
-                        new_obj.folder = fld
-                        new_obj.save()
 
                     if obj_type == "image":
                         attachment,created = ImageAttachment.objects.get_or_create(zoterokey=key, parent= parent)
