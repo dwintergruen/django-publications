@@ -1,5 +1,5 @@
 from publications.models.archive import Archive
-from publications.models.attachment import ImageAttachment, PDFAttachment
+from publications.models.attachment import ImageAttachment, PDFAttachment, Attachment, AttachmentType
 from publications.models.collection import Collection
 from publications.models.creator import Creator, Person, Role
 from publications.models.tag import Tag
@@ -26,6 +26,8 @@ admin.site.register(Tag)
 admin.site.register(Collection)
 admin.site.register(ImageAttachment)
 admin.site.register(PDFAttachment)
+admin.site.register(Attachment)
+admin.site.register(AttachmentType)
 
 
 

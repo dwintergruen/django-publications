@@ -150,11 +150,12 @@ class Command(BaseCommand):
                             logger.debug(f"check if it already exists, with the same sha1_neu")
 
                             objs_old = New_cls.objects.filter(sha1 = sha1_neu).exclude(id=new_obj.id) #same object exists already
-                            if len(objs_old) > 0:
+                            if len(objs_old) == 1:
                                 new_obj.delete()
                                 del new_obj
                                 logger.debug(f"already exists, will use this one. delete the new object again.")
-                                new_obj = obj_old
+                                new_obj = objs_old[0]
+
                             elif  len(objs_old) == 0:
                                 logger.info("upload new object")
 
