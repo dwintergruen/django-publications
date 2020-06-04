@@ -99,6 +99,10 @@ class Command(BaseCommand):
                             continue
                         except:
                             pass
+                    except New_cls.MultipleObjectsReturned:
+                        logger.info(f"{filename} exist more than once!")
+                        logger.info(f"Cannot decide what's correct so will check also sha!")
+
 
 
                 try:
@@ -140,10 +144,7 @@ class Command(BaseCommand):
                     sha1_neu =  new_obj.sha1
                     if not always_upload: #don't save the new object if we have already a files with the same sha
                         try:
-                            if check_only_filename:
-                                obj_old = New_cls.objects.get(original_filename=filename)
-                            else:
-                                obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
+                            obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
                             new_obj.delete()
                             del new_obj
                             new_obj = obj_old
