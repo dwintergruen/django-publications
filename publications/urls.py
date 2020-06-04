@@ -8,7 +8,7 @@ except ImportError:
     from django.conf.urls.defaults import url
 
 from publications import views
-
+from publications.views import collection
 app_name = 'publications'
 urlpatterns = [
     url(r'^$', views.year, name='index'),
@@ -17,5 +17,7 @@ urlpatterns = [
     url(r'^tag/(?P<keyword>.+)/$', views.keyword, name='keyword'),
     url(r'^list/(?P<list>.+)/$', views.list, name='list'),
     url(r'^unapi/$', views.unapi, name='unapi'),
+    url(r'^collection$', collection.collectionView, name='collectionView'),
     url(r'^(?P<name>.+)/$', views.author, name='author'),
+    url(r'^(?P<name>.*)/$', views.author, name='author'),
 ]

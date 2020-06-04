@@ -126,7 +126,9 @@ class Command(BaseCommand):
                                 if not os.path.exists(path):
                                     path = None
 
+
                         if path:
+                            logging.debug("read file from infolder")
                             f = open(path,"rb")
                         else:
                             try:

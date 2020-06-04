@@ -43,7 +43,7 @@ class URLAttachment(models.Model):
 class Attachment(models.Model):
     #zoterokey = models.CharField(max_length=30,blank=True,null=True)
     parent = models.ForeignKey(Publication,on_delete=models.CASCADE)
-    file = FilerImageField(null=True,blank=True,on_delete=models.CASCADE)
+    file = FilerFileField(null=True,blank=True,on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag, blank=True)
     name =  models.CharField(max_length=3000,blank=True,null=True)
     related_URLAttachment =  models.ManyToManyField(URLAttachment, blank=True)
