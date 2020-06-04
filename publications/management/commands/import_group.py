@@ -117,6 +117,7 @@ class Command(BaseCommand):
 
                 else:
                     if not new_obj: #haven'T found a file already above
+                        logger.debug(f"might have to created a new object {new_obj} ")
                         path = None
                         if in_folder:
                             path = os.path.join(in_folder, key) + ".pdf"
@@ -129,6 +130,7 @@ class Command(BaseCommand):
                             f = open(path,"rb")
                         else:
                             try:
+                                logging.debug("read file from zotero")
                                 bts = zot.file(key)
                             except pyzotero.zotero_errors.ResourceNotFound:
                                 logger.error(f"Ressource not found: {key} ")
@@ -142,14 +144,18 @@ class Command(BaseCommand):
                                                          file=file_obj)
 
                         sha1_neu =  new_obj.sha1
+                        logger.debug(f"created a new object {new_obj}")
                         if not always_upload: #don't save the new object if we have already a files with the same sha
+                            logger.debug(f"not always upload selected")
+                            logger.debug(f"check if it already exists, with the same sha1_neu")
                             try:
                                 obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
                                 new_obj.delete()
                                 del new_obj
+                                logger.debug(f"exists already exists, will use this one. delete the new object again.")
                                 new_obj = obj_old
                             except New_cls.DoesNotExist:
-                                logger.info("upload new image")
+                                logger.info("upload new object")
 
                                 fld = Folder.objects.get(name=folder_name)
                                 new_obj.folder = fld
@@ -167,15 +173,21 @@ class Command(BaseCommand):
                                 fld = Folder.objects.get(name=folder_name)
                                 new_obj.folder = fld
                         else: #always_upload
+                            logger.debug(f"always upload selected")
                             fld,created = Folder.objects.get_or_create(name=folder_name)
                             new_obj.folder = fld
                             new_obj.save()
 
+                    logger.debug(f"will create attachment now")
                     if obj_type == "image":
                         attachment,created = ImageAttachment.objects.get_or_create(zoterokey=key, parent= parent)
                     else:
+
                         attachment, created = PDFAttachment.objects.get_or_create(zoterokey=key, parent=parent)
+                        if created:
+                            logger.debug("created new pdf attachement!")
                     attachment.file = new_obj
+                    logger.debug(f"adding tags")
                     for t in tags:
                         attachment.tags.append(t)
                     #attachment.parent = Publication.objects.get_or_create(zoterokey=parentItem)
