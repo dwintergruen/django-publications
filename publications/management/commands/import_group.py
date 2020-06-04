@@ -117,7 +117,7 @@ class Command(BaseCommand):
 
                 else:
                     if not new_obj: #haven'T found a file already above
-                        logger.debug(f"might have to created a new object {new_obj} ")
+                        logger.debug(f"Might have to created a new object. ")
                         path = None
                         if in_folder:
                             path = os.path.join(in_folder, key) + ".pdf"
@@ -148,28 +148,29 @@ class Command(BaseCommand):
                         if not always_upload: #don't save the new object if we have already a files with the same sha
                             logger.debug(f"not always upload selected")
                             logger.debug(f"check if it already exists, with the same sha1_neu")
-                            try:
-                                obj_old = New_cls.objects.get(sha1 = sha1_neu)# .exclude(id=new_obj.id) #same object exists already
+
+                            objs_old = New_cls.objects.filter(sha1 = sha1_neu).exclude(id=new_obj.id) #same object exists already
+                            if len(objs_old) > 0:
                                 new_obj.delete()
                                 del new_obj
-                                logger.debug(f"exists already exists, will use this one. delete the new object again.")
+                                logger.debug(f"already exists, will use this one. delete the new object again.")
                                 new_obj = obj_old
-                            except New_cls.DoesNotExist:
+                            elif  len(objs_old) == 0:
                                 logger.info("upload new object")
 
                                 fld = Folder.objects.get(name=folder_name)
                                 new_obj.folder = fld
                                 new_obj.save()
 
-                            except New_cls.MultipleObjectsReturned:
+                            else:
                                 logger.warning("Objects exists more than once")
-                                images_old = New_cls.objects.filter(sha1=sha1_neu).exclude(id=new_obj.id)
-                                for i in images_old:
+
+                                for i in objs_old:
                                     logger.warning(i.label)
                                 logger.warning(f"I choose the first!")
                                 new_obj.delete()
                                 del new_obj
-                                new_obj = images_old[0]
+                                new_obj = objs_old[0]
                                 fld = Folder.objects.get(name=folder_name)
                                 new_obj.folder = fld
                         else: #always_upload
