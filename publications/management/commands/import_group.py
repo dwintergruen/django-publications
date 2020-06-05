@@ -315,11 +315,15 @@ class Command(BaseCommand):
 
                 obj.save()
 
+                obj.tags.clear()
                 for tag in self.createTags(data.get("tags",[])):
                     obj.tags.add(tag)
 
+                obj.creators.clear()
                 for creator in creators:
                     obj.creators.add(creator)
+
+                obj.collection_set.clear()
                 for c in data["collections"]:
                     collection,created = Collection.objects.get_or_create(zoterokey = c)
                     collection.items.add(obj)
