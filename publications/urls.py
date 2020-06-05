@@ -1,3 +1,5 @@
+from django.urls import path
+
 __license__ = 'MIT License <http://www.opensource.org/licenses/mit-license.php>'
 __author__ = 'Lucas Theis <lucas@theis.io>'
 __docformat__ = 'epytext'
@@ -17,7 +19,10 @@ urlpatterns = [
     url(r'^tag/(?P<keyword>.+)/$', views.keyword, name='keyword'),
     url(r'^list/(?P<list>.+)/$', views.list, name='list'),
     url(r'^unapi/$', views.unapi, name='unapi'),
-    url(r'^collection$', collection.collectionView, name='collectionView'),
+    url(r'^allpublications', collection.collectionView, name='allPublications'),
+    url(r'^collections', collection.collectionsList, name='collectionList'),
+    path('collection/<int:pk>', collection.collectionView, name='collectionView'),
+    path('duplicateCollection/<int:pk>', collection.duplicateCollection, name='duplicateCollectionView'),
     url(r'^(?P<name>.+)/$', views.author, name='author'),
     url(r'^(?P<name>.*)/$', views.author, name='author'),
 ]

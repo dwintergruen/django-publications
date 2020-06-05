@@ -10,6 +10,10 @@ __docformat__ = 'epytext'
 
 import os
 
+ATTACHMENTTYPES = "body,abstract,TEI,html,pdf_text,abstract_modified".split(",") ## types of the Attachment to be counted
+
+# (PDFAttachments are handled separately)
+
 from django.db import models
 from django.utils.http import urlquote_plus
 from django.conf import settings
@@ -108,6 +112,17 @@ class Publication(models.Model):
 	place = models.ForeignKey(Place,null=True,on_delete=models.SET_NULL)
 	callNumber =  models.CharField(max_length=3000,default="")
 	rights = models.CharField(max_length=3000, default="")
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+	updated_at = models.DateTimeField(auto_now=True, null=True)
+
+
+	has_pdf = models.BooleanField(default=False)
+	has_body = models.BooleanField(default=False)
+	has_abstract = models.BooleanField(default=False)
+	has_html = models.BooleanField(default=False)
+	has_TEI = models.BooleanField(default=False)
+	has_pdf_text = models.BooleanField(default=False)
+	has_abstract_modified = models.BooleanField(default=False)
 
 	def __init__(self, *args, **kwargs):
 		models.Model.__init__(self, *args, **kwargs)
@@ -121,6 +136,27 @@ class Publication(models.Model):
 		self.keywords = ', '.join(self.keywords).lower()
 
 		self._produce_author_lists()
+
+	def _set_has_attachments(self):
+		if self.pdfattachment_set.count() > 0:
+			self.has_pdf = True
+		else:
+			self.has_pdf = False
+
+		types = []
+		for atm in self.attachment_set.all():
+			setattr(self,"has_%s" % atm.type.name, True)
+			types.append(atm.type.name)
+
+		missing = set(ATTACHMENTTYPES) - set(types)
+		for m in missing:
+			setattr(self, "has_%s" % m, False)
+
+	def save(self,*args, **kwargs):
+		"""set the attachment status"""
+		self._set_has_attachments()
+		super().save(*args, **kwargs)
+
 
 
 	def _produce_author_lists(self):

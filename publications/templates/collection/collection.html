@@ -1,15 +1,27 @@
 {% load render_table from django_tables2 %}
 {% load bootstrap3 %}
-<!doctype html>
 <html>
     <head>
-        <title>List of publications</title>
+        <title>List of publications: {{title}}</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     </head>
     <body>
+    <h1>{{title}}</h1>
+    {% if pk %}
+    <a href="{% url 'publications:duplicateCollectionView' pk %}">Duplicate</a>
+    {% endif %}
+    {% if counts %}
+     {% for key, value in counts.items %}
+    <tr>
+        <td>{{key}}</td>
+        <td>{{value}}</td>
+    </tr>
+    {% endfor %}
+    {% endif %}
     {% if filter %}
         <form action="" method="get" class="form form-inline">
-            {% bootstrap_form filter.form layout='inline' %}
+            {% bootstrap_label filter.label %}
+            {% bootstrap_form filter.form %}
             {% bootstrap_button 'filter' %}
         </form>
     {% endif %}
