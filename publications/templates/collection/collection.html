@@ -1,12 +1,11 @@
+{% extends "main.html" %}
 {% load render_table from django_tables2 %}
 {% load bootstrap3 %}
-<html>
-    <head>
-        <title>List of publications: {{title}}</title>
+{% block js %}
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-    </head>
-    <body>
-    <h1>{{title}}</h1>
+{% endblock js %}
+    {% block title %} {{title}} {% endblock %}
+{% block content %}
     {% if pk %}
     <a href="{% url 'publications:duplicateCollectionView' pk %}">Duplicate</a>
     {% endif %}
@@ -26,5 +25,5 @@
         </form>
     {% endif %}
         {% render_table table %}
-    </body>
-</html>
+
+{% endblock %}

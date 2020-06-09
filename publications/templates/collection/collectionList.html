@@ -1,12 +1,14 @@
+{% extends "main.html" %}
+{% load cms_tags %}
 {% load render_table from django_tables2 %}
 {% load bootstrap3 %}
-<!doctype html>
-<html>
-    <head>
-        <title>List of Collections</title>
+{% block title %}List of Collections{% endblock title %}
+
+ {% block js %}
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-    </head>
-    <body>
+{% endblock js %}
+
+    {% block content %}
     {% if filter %}
         <form action="" method="get" class="form form-inline">
             {% bootstrap_form filter.form layout='inline' %}
@@ -14,5 +16,4 @@
         </form>
     {% endif %}
         {% render_table table %}
-    </body>
-</html>
+    {% endblock content %}

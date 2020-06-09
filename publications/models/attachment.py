@@ -2,7 +2,6 @@ from django.db import  models
 from django.db.models import URLField
 from filer.fields.file import FilerFileField
 from filer.fields.image import FilerImageField
-
 from publications.models import Publication
 from publications.models.tag import Tag
 
@@ -20,6 +19,7 @@ class AbstractAttachment(models.Model):
     name = models.CharField(max_length=3000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True,null=True)
     updated_at = models.DateTimeField(auto_now=True,null=True)
+    derived_from = models.ManyToManyField("Attachment",null=True,blank=True)
 
     class Meta:
         abstract = True

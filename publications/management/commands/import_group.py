@@ -112,7 +112,7 @@ class Command(BaseCommand):
                     continue
 
                 if no_upload:
-                    attachment, created = PDFAttachment.objects.get_or_create(zoterokey=key, parent=parent)
+                    attachment, created = PDFAttachment.objects.get_or_create(zoterokey=key, parent=parent, name=filename)
                     attachment.save()
 
                 else:

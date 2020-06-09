@@ -6,7 +6,7 @@ from django.db import models
 from django.urls import reverse
 
 from publications.models import Publication
-from publications.models.attachment import PDFAttachment
+from publications.models.attachment import PDFAttachment, AttachmentType
 
 from publications.models.publication import ATTACHMENTTYPES
 class Collection(models.Model):
@@ -35,7 +35,7 @@ class Collection(models.Model):
     def __str__(self):
         return self.name
 
-    def _count_attachments(self):
+    def _count_attachments_old(self):
         counts = defaultdict(int)
         for i in self.items.all():
             if i.has_pdf:
@@ -46,6 +46,18 @@ class Collection(models.Model):
 
         self.counts = json.dumps(counts)
 
+    def _count_attachments(self):
+        counts = defaultdict(int)
+        for i in self.items.all():
+            if i.has_pdf:
+                counts["pdf"] += 1
+            for type in ATTACHMENTTYPES:
+                tp = AttachmentType.get(name=type)
+                attms = i.attachment_set.filter(type=tp).count()
+                if getattr(i, "has_%s" % type):
+                    counts[type] += 1
+
+        self.counts = json.dumps(counts)
 
     def save(self, *args, **kwargs):
         """count all attachments by type"""

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from publications.models.archive import Archive
+#from publications.models.attachment import AttachmentType
 from publications.models.creator import Creator
 from publications.models.place import Place
 from publications.models.tag import Tag
@@ -10,8 +11,14 @@ __docformat__ = 'epytext'
 
 import os
 
-ATTACHMENTTYPES = "body,abstract,TEI,html,pdf_text,abstract_modified".split(",") ## types of the Attachment to be counted
+ATTACHMENTTYPES = "body," \
+				  "abstract," \
+				  "TEI,html,pdf_text,abstract_modified,pdf_re_ocred," \
+				  "lemmatize," \
+				  "tokenize".split(",") ## types of the Attachment to be counted
 
+
+#ATTACHMENTTYPES = [x.name for x in AttachmentType.objects.all()]
 # (PDFAttachments are handled separately)
 
 from django.db import models
