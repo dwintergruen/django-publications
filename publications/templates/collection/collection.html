@@ -7,10 +7,13 @@
     {% block title %} {{title}} {% endblock %}
 {% block content %}
     {% if pk %}
-    <a href="{% url 'publications:duplicateCollectionView' pk %}">Duplicate</a>
+<p>
+    <a class="btn btn-info" href="{% url 'publications:duplicateCollectionView' pk %}">Duplicate</a>
+</p>
     {% endif %}
     {% if counts %}
      {% for key, value in counts.items %}
+    
     <tr>
         <td>{{key}}</td>
         <td>{{value}}</td>
