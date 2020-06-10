@@ -2,6 +2,7 @@ from publications.models.archive import Archive
 from publications.models.attachment import ImageAttachment, PDFAttachment, Attachment, AttachmentType
 from publications.models.collection import Collection
 from publications.models.creator import Creator, Person, Role
+from publications.models.ner_object import NER_object, NER_type
 from publications.models.tag import Tag
 
 __license__ = 'MIT License <http://www.opensource.org/licenses/mit-license.php>'
@@ -28,6 +29,10 @@ admin.site.register(ImageAttachment)
 admin.site.register(PDFAttachment)
 admin.site.register(Attachment)
 admin.site.register(AttachmentType)
+admin.site.register(NER_object)
+admin.site.register(NER_type)
+
+
 
 
 

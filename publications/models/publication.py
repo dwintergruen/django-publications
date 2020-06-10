@@ -2,6 +2,7 @@
 from publications.models.archive import Archive
 #from publications.models.attachment import AttachmentType
 from publications.models.creator import Creator
+from publications.models.ner_object import NER_object
 from publications.models.place import Place
 from publications.models.tag import Tag
 
@@ -75,6 +76,7 @@ class Publication(models.Model):
 
 	type = models.ForeignKey(Type, on_delete=models.CASCADE)
 	zoterokey  = models.CharField(max_length=512,blank=True, null = True, help_text='Zotero key. Leave blank if unsure.')
+	solr_id = models.CharField(max_length=1000, blank=True, null=True, help_text='solr_id. Leave blank if unsure.')
 	citekey = models.CharField(max_length=512, blank=True, null=True,
 		help_text='BibTex citation key. Leave blank if unsure.')
 	title = models.CharField(max_length=10000)
@@ -122,8 +124,10 @@ class Publication(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
+	ner_objects = models.ManyToManyField(NER_object,blank=True)
 
 	has_pdf = models.BooleanField(default=False)
+	has_urls = models.BooleanField(default=False)
 	has_body = models.BooleanField(default=False)
 	has_abstract = models.BooleanField(default=False)
 	has_html = models.BooleanField(default=False)
@@ -149,6 +153,11 @@ class Publication(models.Model):
 			self.has_pdf = True
 		else:
 			self.has_pdf = False
+
+		if self.urlattachment_set.count() > 0:
+			self.has_urls = True
+		else:
+			self.has_urls = False
 
 		types = []
 		for atm in self.attachment_set.all():

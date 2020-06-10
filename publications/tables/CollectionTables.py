@@ -53,7 +53,7 @@ class CollectionTable(tables.Table):
     def render_abstract(self,value,record):
         attachments = Attachment.objects.filter(parent=record)
         for atm in attachments:
-            if "type" == "abstract":
+            if atm.type.name == "abstract":
                 return atm.file.file.read().decode("utf-8")
         return "--"
 

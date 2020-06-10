@@ -52,16 +52,25 @@ class Collection(models.Model):
             if i.has_pdf:
                 counts["pdf"] += 1
             for type in ATTACHMENTTYPES:
-                tp = AttachmentType.get(name=type)
+                try:
+                    tp = AttachmentType.objects.get(name=type)
+                except AttachmentType.DoesNotExist:
+                    continue
                 attms = i.attachment_set.filter(type=tp).count()
-                if getattr(i, "has_%s" % type):
+                if attms > 0:
                     counts[type] += 1
 
         self.counts = json.dumps(counts)
 
     def save(self, *args, **kwargs):
         """count all attachments by type"""
-        self._count_attachments()
+
+        if not kwargs.get("no_count",False):
+            if self.id: #objects is saved
+                self._count_attachments()
+
+        if "no_count" in kwargs:
+            del kwargs["no_count"]
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
