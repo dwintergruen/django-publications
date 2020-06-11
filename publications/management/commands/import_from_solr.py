@@ -52,7 +52,7 @@ def add_or_change_publication(r, collection):
 
     publication.save()
     collection.items.add(publication)
-    collection.save(no_count=True)
+    collection.save()
 
 class Command(BaseCommand):
 
