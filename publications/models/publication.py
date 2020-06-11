@@ -12,13 +12,13 @@ __docformat__ = 'epytext'
 
 import os
 
-ATTACHMENTTYPES = "body," \
+ATTACHMENTTYPES_RAW = "body," \
 				  "abstract," \
-				  "TEI,html,pdf_text,abstract_modified,pdf_re_ocred," \
-				  "lemmatize," \
-				  "tokenize".split(",") ## types of the Attachment to be counted
+				  "TEI,html,pdf_text,abstract_modified,pdf_re_ocred".split(",") ## types of the Attachment to be counted
 
-
+ATTACHMENTTYPES = ["lemmatize_" + x for x in ATTACHMENTTYPES_RAW]
+ATTACHMENTTYPES += ["tokenize_" + x for x in ATTACHMENTTYPES_RAW]
+ATTACHMENTTYPES_RAW = ATTACHMENTTYPES + ATTACHMENTTYPES_RAW
 #ATTACHMENTTYPES = [x.name for x in AttachmentType.objects.all()]
 # (PDFAttachments are handled separately)
 
