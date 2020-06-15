@@ -77,6 +77,7 @@ class Command(BaseCommand):
                     logger.error(f"{key} has no parent item. not imported!")
                     continue
 
+
                 if parent_id_as_fn:
 
                     _name,ext = os.path.splitext(filename)
@@ -86,6 +87,8 @@ class Command(BaseCommand):
 
                     _name,ext = os.path.splitext(filename)
                     filename = key + ext
+
+
 
                 new_obj = None
                 if check_only_filename:
@@ -383,6 +386,7 @@ class Command(BaseCommand):
                             help="add attachment but no file upload")
 
         parser.add_argument("--max_no_import", default=None, type=int)
+        parser.add_argument("--import_collection", default=None)
 
     def handle(self, *args, **options):
 
@@ -410,7 +414,11 @@ class Command(BaseCommand):
             if options["max_no_import"]:
                 items = list(zot.items())[0:options["max_no_import"]]
             else:
-                items = zot.everything(zot.items())
+
+                if options["import_collection"]:
+                    items =  zot.everything(zot.collection_items(options["import_collection"]))
+                else:
+                    items = zot.everything(zot.items())
 
         if to_file:
             import pickle
