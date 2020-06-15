@@ -21,12 +21,14 @@ logger = logging.getLogger(__name__)
 FIELDS= ["id","date","year","journal","title","people_ss","organization_ss","location_ss"]
 
 
-def add_or_change_publication(r, collection):
+def add_or_change_publication(r, collection, update = False):
 
     solr_id = r["id"]
 
     tp = Type.objects.get(type="Journal")
     publication,created = Publication.objects.get_or_create(solr_id = solr_id, type = tp)
+    if not created and not update:
+        return
     try:
         publication.year = int(r["year"])
     except TypeError:
@@ -56,7 +58,7 @@ def add_or_change_publication(r, collection):
 
 class Command(BaseCommand):
 
-    def import_from_solr(self,solr_url,qs,collection):
+    def import_from_solr(self,solr_url,qs,collection,update=False):
 
         collection, created = Collection.objects.get_or_create(name=collection)
 
@@ -68,17 +70,18 @@ class Command(BaseCommand):
         for start in tqdm.tqdm(range(0,res.hits,LENGTH)):
             res = solr.search(qs,start=start,rows=LENGTH,fl=FIELDS)
             for r in res:
-                add_or_change_publication(r,collection)
+                add_or_change_publication(r,collection, update=update)
 
     def add_arguments(self, parser):
         parser.add_argument('--solr_url', type=str)
         parser.add_argument('--qs', type=str)
         parser.add_argument('--collection', type = str)
+        parser.add_argument('--update', const=True, default=False, nargs="?")
 
 
     def handle(self, *args, **options):
         logging.basicConfig(level=logging.DEBUG)
-        self.import_from_solr(options["solr_url"],options["qs"],options["collection"])
+        self.import_from_solr(options["solr_url"],options["qs"],options["collection"],update=options["update"])
 
 
 
