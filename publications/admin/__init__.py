@@ -1,6 +1,6 @@
 from publications.models.archive import Archive
 from publications.models.attachment import ImageAttachment, PDFAttachment, Attachment, AttachmentType, \
-    CollectionAttachment
+    CollectionAttachment, ProcessingType, FormatType
 from publications.models.collection import Collection
 from publications.models.creator import Creator, Person, Role
 from publications.models.ner_object import NER_object, NER_type
@@ -30,6 +30,8 @@ admin.site.register(ImageAttachment)
 admin.site.register(PDFAttachment)
 admin.site.register(Attachment)
 admin.site.register(AttachmentType)
+admin.site.register(ProcessingType)
+admin.site.register(FormatType)
 admin.site.register(NER_object)
 admin.site.register(NER_type)
 admin.site.register(CollectionAttachment)

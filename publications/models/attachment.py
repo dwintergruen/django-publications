@@ -14,10 +14,22 @@ class AttachmentType(models.Model):
     def __str__(self):
         return self.name
 
+class ProcessingType(models.Model):
+    name = models.CharField(max_length=2024)
+
+    def __str__(self):
+        return self.name
+
+
+class FormatType(models.Model):
+    name = models.CharField(max_length=2024)
+
+    def __str__(self):
+        return self.name
 class AbstractAttachment(models.Model):
     zoterokey = models.CharField(max_length=30, blank=True, null=True)
     tags = models.ManyToManyField(Tag, blank=True)
-    type = models.ForeignKey(AttachmentType, on_delete=models.SET_NULL, null=True)
+    type_of_text = models.ForeignKey(AttachmentType, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=3000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
@@ -63,6 +75,8 @@ class Attachment(AbstractPublicationAttachment):
 class CollectionAttachment(AbstractAttachment):
     parent = models.ForeignKey("Collection", on_delete=models.CASCADE)
     file = FilerFileField(null=True, blank=True, on_delete=models.CASCADE)
-
+    type_of_processing = models.ForeignKey(ProcessingType, on_delete=models.SET_NULL, null=True)
+    format = models.ForeignKey(FormatType, on_delete=models.SET_NULL, null=True)
+    derived_from_collection_attachment = models.ManyToManyField("CollectionAttachment", null=True, blank=True)
     def __str__(self):
         return str(self.name)
