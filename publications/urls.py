@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^unapi/$', views.unapi, name='unapi'),
     url(r'^allpublications', collection.collectionView, name='allPublications'),
     url(r'^collections', collection.collectionsList, name='collectionList'),
+    path('collection/timeDistribution/<int:collection>', collection.collectionTimeDistribution, name='collectionTimeDistribution'),
     path('collection/<int:pk>', collection.collectionView, name='collectionView'),
     path('duplicateCollection/<int:pk>', collection.duplicateCollection, name='duplicateCollectionView'),
     url(r'^(?P<name>.+)/$', views.author, name='author'),

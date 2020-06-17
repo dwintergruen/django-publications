@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
 from publications.models import Publication
@@ -66,3 +67,27 @@ def duplicateCollection(request,pk,newName=None):
     newCollection.save()
 
     return redirect(newCollection.get_absolute_url())
+
+def collectionTimeDistribution(request,collection):
+
+    only_year = request.GET.get("only_year","false").lower()
+
+    only_year = (only_year == "true")
+    collection = get_object_or_404(Collection,pk=collection)
+
+    counter = collection.timeDistribution(only_year)
+    ret = []
+    if only_year:
+        for k,v in counter.items():
+            ret.append(f"{k}\t{v}")
+    else:
+        for y_m,v in counter.items():
+            y,m = y_m
+            ret.append(f"{y}\t{m}\t{v}")
+
+    ret = "\n".join(ret)
+
+    return HttpResponse(ret.encode("utf-8"),content_type="text/tab-separated-values")
+
+
+

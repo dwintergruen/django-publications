@@ -1,6 +1,7 @@
 import json
-from collections import defaultdict
+from collections import defaultdict, Counter
 
+import dateparser as dateparser
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
@@ -9,6 +10,9 @@ from publications.models import Publication
 from publications.models.attachment import PDFAttachment, AttachmentType
 
 from publications.models.publication import ATTACHMENTTYPES
+import logging
+logger = logging.getLogger(__name__)
+
 class Collection(models.Model):
 
     zoterokey = models.CharField(max_length=100)
@@ -79,3 +83,44 @@ class Collection(models.Model):
     def getCounts(self):
         cnts = json.loads(self.counts)
         return cnts
+
+    def timeDistribution(self,only_year = False):
+
+        time_list = []
+        for item in self.items.all():
+            date = item.date
+            year = item.year
+            if not date:
+                date = "%s-1-1"%year
+            try:
+                month = dateparser.parse(date).month
+                year  = dateparser.parse(date).year
+            except TypeError:
+                if year:
+                    year =year
+                    month = 1
+                    logger.debug(f"no date for {item} -- {date} - take year {year}")
+                else:
+                    logger.error(f"no date for {item} -- {date}")
+                    continue
+            except AttributeError:
+                if year:
+                    year = year
+                    month = 1
+                    logger.debug(f"no date for {item} -- {date} - take year {year}")
+                else:
+                    logger.error(f"no date for {item} -- {date}")
+                    continue
+
+
+            if not only_year:
+                time_list.append((month,year))
+            else:
+                time_list.append(year)
+
+        counted_mount_year = Counter(time_list)
+        return counted_mount_year
+
+
+
+
