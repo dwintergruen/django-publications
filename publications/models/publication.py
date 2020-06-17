@@ -81,7 +81,7 @@ class Publication(models.Model):
 		help_text='BibTex citation key. Leave blank if unsure.')
 	title = models.CharField(max_length=10000)
 	creators = models.ManyToManyField(Creator) ## added by dwinter
-	authors = models.CharField(max_length=10000,
+	authors = models.CharField(max_length=10000, blank=True, null=True,
 		help_text='List of authors separated by commas or <i>and</i>.')
 	year = models.PositiveIntegerField(default=0) ##default set to 0 DW
 	month = models.IntegerField(choices=MONTH_CHOICES, blank=True, null=True)
@@ -113,14 +113,14 @@ class Publication(models.Model):
 		help_text='Only for a book.') # A-B-C-D
 	lists = models.ManyToManyField(List, blank=True)
 	tags = models.ManyToManyField(Tag,blank=True)
-	archive = models.ForeignKey(Archive,null=True,on_delete=models.SET_NULL)
+	archive = models.ForeignKey(Archive,null=True,on_delete=models.SET_NULL,blank=True)
 
 	## specical for artwork should define a subclasss
 	artworkMedium = models.CharField(max_length=2024,default="")
 	artworkSize = models.CharField(max_length=1024,default="")
-	place = models.ForeignKey(Place,null=True,on_delete=models.SET_NULL)
-	callNumber =  models.CharField(max_length=3000,default="")
-	rights = models.CharField(max_length=3000, default="")
+	place = models.ForeignKey(Place,null=True,on_delete=models.SET_NULL,blank=True)
+	callNumber =  models.CharField(max_length=3000,default="",blank=True,null=True)
+	rights = models.CharField(max_length=3000, default="",blank=True,null=True)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
@@ -181,6 +181,10 @@ class Publication(models.Model):
 		"""
 
 		# post-process author names
+		if self.authors is None:
+			self.authors_list = []
+			return
+
 		self.authors = self.authors.replace(', and ', ', ')
 		self.authors = self.authors.replace(',and ', ', ')
 		self.authors = self.authors.replace(' and ', ', ')
@@ -340,8 +344,10 @@ class Publication(models.Model):
 
 
 	def first_author(self):
-		return self.authors_list[0]
-
+		try:
+			return self.authors_list[0]
+		except:
+			return ""
 
 	def journal_or_book_title(self):
 		if self.journal:

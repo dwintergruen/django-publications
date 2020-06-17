@@ -1,5 +1,5 @@
 from publications.models.archive import Archive
-from publications.models.attachment import ImageAttachment, PDFAttachment, URLAttachment
+from publications.models.attachment import ImageAttachment, PDFAttachment, URLAttachment, Attachment
 from publications.models.creator import Creator, Role
 from publications.models.tag import Tag
 
@@ -32,16 +32,26 @@ class CustomFileInline(admin.StackedInline):
 	extra = 1
 	max_num = 5
 
+class AttachmentInline(admin.StackedInline):
+	model = Attachment
+	extra = 1
+	max_num = 5
+	fields = ("tags", "type_of_text", "name", "lang", "user", "file")
+
+
 class ImageAttachmentInline(admin.StackedInline):
 	model = ImageAttachment
 	extra = 1
 	max_num = 5
+	fields = ("tags","type_of_text","name","lang","user","file")
 
 
 class PDFAttachmentInline(admin.StackedInline):
 	model = PDFAttachment
 	extra = 1
 	max_num = 5
+	fields = ("tags", "type_of_text", "name", "lang", "user", "file")
+
 
 class URLAttachmentInline(admin.StackedInline):
 	model = URLAttachment
@@ -87,7 +97,7 @@ class PublicationAdmin(admin.ModelAdmin):
 			('lists',)}),
 	)
 	inlines = [ImageAttachmentInline,PDFAttachmentInline,CustomLinkInline,
-			   CustomFileInline# ,CreatorsInline
+			   CustomFileInline, AttachmentInline# ,CreatorsInline
 			   ]
 
 	def get_urls(self):
