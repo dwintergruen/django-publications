@@ -60,7 +60,7 @@ class Collection(models.Model):
                     tp = AttachmentType.objects.get(name=type)
                 except AttachmentType.DoesNotExist:
                     continue
-                attms = i.attachment_set.filter(type=tp).count()
+                attms = i.attachment_set.filter(type_of_text=tp).count()
                 if attms > 0:
                     counts[type] += 1
 

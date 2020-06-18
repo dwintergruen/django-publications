@@ -161,8 +161,8 @@ class Publication(models.Model):
 
 		types = []
 		for atm in self.attachment_set.all():
-			setattr(self,"has_%s" % atm.type.name, True)
-			types.append(atm.type.name)
+			setattr(self,"has_%s" % atm.type_of_text.name, True)
+			types.append(atm.type_of_text.name)
 
 		missing = set(ATTACHMENTTYPES) - set(types)
 		for m in missing:
