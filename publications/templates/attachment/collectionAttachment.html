@@ -1,0 +1,13 @@
+{% extends "main.html" %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% block js %}
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+{% endblock js %}
+    {% block title %} {{title}} {% endblock %}
+{% block content %}
+
+<p>Name: {{obj.name}}</p>
+<p>Name: {{obj.type.name}}</p>
+<p><a href="{% url 'publications:downloadFile' obj.file.pk %}">Download</a></p>
+{% endblock content %}

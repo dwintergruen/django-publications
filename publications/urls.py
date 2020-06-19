@@ -10,7 +10,7 @@ except ImportError:
     from django.conf.urls.defaults import url
 
 from publications import views
-from publications.views import collection
+from publications.views import collection, attachment
 app_name = 'publications'
 urlpatterns = [
     url(r'^$', views.year, name='index'),
@@ -24,6 +24,8 @@ urlpatterns = [
     path('collection/timeDistribution/<int:collection>', collection.collectionTimeDistribution, name='collectionTimeDistribution'),
     path('collection/<int:pk>', collection.collectionView, name='collectionView'),
     path('duplicateCollection/<int:pk>', collection.duplicateCollection, name='duplicateCollectionView'),
+    path('showCollectionAttachment/<int:pk>', attachment.showCollectionAttachment, name='showCollectionAttachment'),
+    path('downloadFile/<int:pk>', attachment.downloadFile, name='downloadFile'),
     url(r'^(?P<name>.+)/$', views.author, name='author'),
     url(r'^(?P<name>.*)/$', views.author, name='author'),
 ]

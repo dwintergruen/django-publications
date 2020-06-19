@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import URLField
+from django.urls import reverse
 from filer.fields.file import FilerFileField
 from filer.fields.image import FilerImageField
 from publications.models import Publication
@@ -80,3 +81,7 @@ class CollectionAttachment(AbstractAttachment):
     derived_from_collection_attachment = models.ManyToManyField("CollectionAttachment", null=True, blank=True)
     def __str__(self):
         return str(self.name)
+
+    def get_absolute_url(self):
+
+        return reverse("publications:showCollectionAttachment", kwargs={"pk": self.pk})
