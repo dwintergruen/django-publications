@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from publications.models import Publication
-from publications.models.attachment import Attachment
+from publications.models.attachment import Attachment, CollectionAttachment
 from publications.models.collection import Collection
 
 
@@ -36,8 +36,8 @@ class CollectionTable(tables.Table):
         atms = record.attachment_set.all()
         types = []
         for atm in atms:
-            if atm.type is not None:
-                types.append(atm.type.name)
+            if atm.type_of_text is not None:
+                types.append(atm.type_of_text.name)
         return format_html("\n".join(types))
 
     def render_pdf(self, value, record):
@@ -53,14 +53,14 @@ class CollectionTable(tables.Table):
     def render_abstract(self,value,record):
         attachments = Attachment.objects.filter(parent=record)
         for atm in attachments:
-            if atm.type.name == "abstract":
+            if atm.type_of_text.name == "abstract":
                 return atm.file.file.read().decode("utf-8")
         return "--"
 
     def render_abstract_modified(self,value,record):
         attachments = Attachment.objects.filter(parent=record)
         for atm in attachments:
-            if atm.type.name == "abstract_modified":
+            if atm.type_of_text.name == "abstract_modified":
                 return atm.file.file.read().decode("utf-8")
         return "--"
 
@@ -75,6 +75,10 @@ class CollectionTable(tables.Table):
 
 class CollectionListTable(tables.Table):
 
+    def render_items(self,value,record):
+
+        return format_html(f"{record.items.all().count()}")
+
     def render_name(self, value, record):
         url = reverse("publications:collectionView",kwargs={"pk":record.pk})
         return format_html(f"<a href='{url}'>{value}</a>")
@@ -82,7 +86,22 @@ class CollectionListTable(tables.Table):
     class Meta:
         model = Collection
         template_name = "django_tables2/bootstrap.html"
-        fields = ("name",)
+        fields = ("name","items")
 
 
 
+class CollectionAttachmentTable(tables.Table):
+
+    def render_name(self,value,record):
+        return format_html(f"<a href='{record.get_absolute_url()}'>{value}</a>")
+
+    def render_type_of_text(self,value,record):
+        return format_html(record.type_of_text.name)
+
+    def render_type_of_processing(self, value, record):
+        return format_html(record.type_of_processing.name)
+
+    class Meta:
+        model = CollectionAttachment
+        template_name = "django_tables2/bootstrap.html"
+        exclude = ("updated_at", "parent","file")

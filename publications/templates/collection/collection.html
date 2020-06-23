@@ -9,6 +9,7 @@
     {% if pk %}
 <p>
     <a class="btn btn-info" href="{% url 'publications:duplicateCollectionView' pk %}">Duplicate</a>
+    <a class="btn btn-info" href="{% url 'publicationsExtension:plot_d' pk %}">Plot timeline</a>
 </p>
     {% endif %}
     {% if counts %}
@@ -20,6 +21,7 @@
     </tr>
     {% endfor %}
     {% endif %}
+
     {% if filter %}
         <form action="" method="get" class="form form-inline">
             {% bootstrap_label filter.label %}
@@ -29,4 +31,7 @@
     {% endif %}
         {% render_table table %}
 
+
+<h3>Attachments</h3>
+{% render_table attachment_table %}
 {% endblock %}

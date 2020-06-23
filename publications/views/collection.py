@@ -4,16 +4,16 @@ from django.shortcuts import get_object_or_404, render, redirect
 from publications.models import Publication
 from publications.models.collection import Collection
 
-from publications.tables.CollectionTables import CollectionTable, CollectionFilter, CollectionListTable
+from publications.tables.CollectionTables import CollectionTable, CollectionFilter, CollectionListTable, \
+    CollectionAttachmentTable
 
 
 def collectionsList(request):
     collections = Collection.objects.all()
 
-
     table = CollectionListTable(collections)
     table.paginate(page=request.GET.get("page", 1), per_page=25)
-    table.order_by = "title"  # request.GET.get("sort","title")
+    table.order_by = request.GET.get("sort","title")
 
     return render(request, "collection/collectionList.html", {
         "table": table,
@@ -40,15 +40,18 @@ def collectionView(request,pk=None):
     filter = CollectionFilter(res, queryset=publications)
     table = CollectionTable(filter.qs)
     table.paginate(page=request.GET.get("page", 1), per_page=25)
-    table.order_by = "title" #request.GET.get("sort","title")
+    table.order_by = request.GET.get("sort","title")
 
+    attachment_table = CollectionAttachmentTable(collection.collectionattachment_set.all())
+    attachment_table.order_by = "-created_at"
 
     return render(request, "collection/collection.html", {
         "title" : title,
         "pk" : pk,
         "table": table,
         "filter" : filter,
-        "counts" : counts
+        "counts" : counts,
+        "attachment_table" :  attachment_table
     })
 
 def duplicateCollection(request,pk,newName=None):
