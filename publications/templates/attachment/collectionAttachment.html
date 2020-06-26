@@ -8,8 +8,8 @@
 {% block content %}
 
 <p>Name: {{obj.name}}</p>
-<p>Name: {{obj.type_of_processing.name}}</p>
-<p>Name: {{obj.type_of_text.name}}</p>
+<p>Type of processing: {{obj.type_of_processing.name}}</p>
+<p>Type of text: {{obj.type_of_text.name}}</p>
 <p><a href="{% url 'publications:downloadFile' obj.file.pk %}">Download</a></p>
 
 {% if 'ploturl' %}
