@@ -20,7 +20,7 @@ class CollectionFilter(django_filters.FilterSet):
         model = Publication
         fields = ["title","year",
                   "has_pdf","has_abstract_modified","has_abstract",
-                  "has_body","has_html","has_pdf_text"]
+                  "has_body","has_html","has_pdf_text","has_pdf_re_ocred"]
 
 class CollectionTable(tables.Table):
 
@@ -70,7 +70,7 @@ class CollectionTable(tables.Table):
             template_name = "django_tables2/bootstrap.html"
             fields = ("title","year","date", "abstract",
                       "has_pdf", "has_abstract_modified", "has_abstract",
-                      "has_body", "has_html", "has_pdf_text")
+                      "has_body", "has_html", "has_pdf_text", "has_pdf_re_ocred")
 
 
 class CollectionListTable(tables.Table):
