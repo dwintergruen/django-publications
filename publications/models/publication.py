@@ -28,6 +28,8 @@ from django.conf import settings
 from publications.fields import PagesField
 from publications.models import Type, List
 from string import ascii_uppercase
+import logging
+logger = logging.getLogger(__name__)
 
 if 'django.contrib.sites' in settings.INSTALLED_APPS:
 	from django.contrib.sites.models import Site
@@ -127,6 +129,7 @@ class Publication(models.Model):
 	ner_objects = models.ManyToManyField(NER_object,blank=True)
 
 	has_pdf = models.BooleanField(default=False)
+	has_pdf_re_ocred = models.BooleanField(default=False)
 	has_urls = models.BooleanField(default=False)
 	has_body = models.BooleanField(default=False)
 	has_abstract = models.BooleanField(default=False)
@@ -172,6 +175,31 @@ class Publication(models.Model):
 		"""set the attachment status"""
 		self._set_has_attachments()
 		super().save(*args, **kwargs)
+
+	def export_attachment(self,typ,out_path):
+		"""
+		export attachment of typ to out_path
+		@param typ: Type of attachment
+		@param out_path: path
+		@return:
+		"""
+		for atm in self.attachment_set.all():
+			export = False
+
+			if (isinstance(typ, str) and atm.type_of_text.name == typ) or atm.type_of_text == typ:
+				file = atm.file.file
+				fn = atm.file.original_filename
+				out_fn = os.path.join(out_path,fn)
+				cnt = 0
+				while os.path.exists(out_fn):
+					head,ext = os.path.splitext(out_fn)
+					out_fn = head  + "_%s"%cnt + ext
+					cnt +=1
+
+
+				with open(out_fn,"wb") as out_f:
+					out_f.write(file.open("rb").read())
+					logger.debug(f"export {out_fn}")
 
 
 
