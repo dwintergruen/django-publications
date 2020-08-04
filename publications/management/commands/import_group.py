@@ -164,7 +164,7 @@ class Command(BaseCommand):
                             elif  len(objs_old) == 0:
                                 logger.info("upload new object")
 
-                                fld = Folder.objects.get(name=folder_name)
+                                fld,created = Folder.objects.get_or_create(name=folder_name)
                                 new_obj.folder = fld
                                 new_obj.save()
 
@@ -177,7 +177,7 @@ class Command(BaseCommand):
                                 new_obj.delete()
                                 del new_obj
                                 new_obj = objs_old[0]
-                                fld = Folder.objects.get(name=folder_name)
+                                fld, created = Folder.objects.get_or_create(name=folder_name)
                                 new_obj.folder = fld
                         else: #always_upload
                             logger.debug(f"always upload selected")

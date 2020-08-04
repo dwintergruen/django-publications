@@ -139,6 +139,7 @@ class Publication(models.Model):
     has_html = models.BooleanField(default=False)
     has_TEI = models.BooleanField(default=False)
     has_pdf_text = models.BooleanField(default=False)
+    has_pdf_from_pages = models.BooleanField(default=False)
     has_abstract_modified = models.BooleanField(default=False)
 
     def __init__(self, *args, **kwargs):

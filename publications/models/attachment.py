@@ -55,7 +55,7 @@ class ImageAttachment(AbstractPublicationAttachment):
 class PDFAttachment(AbstractPublicationAttachment):
     file = FilerFileField(null=True, blank=True, on_delete=models.CASCADE)
     def __str__(self):
-        return str(self.file) + "_" + self.zoterokey
+        return str(self.file) + "_" + str(self.zoterokey)
 
 
 class URLAttachment(AbstractPublicationAttachment):
