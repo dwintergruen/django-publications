@@ -137,6 +137,7 @@ class Publication(models.Model):
     has_body = models.BooleanField(default=False)
     has_abstract = models.BooleanField(default=False)
     has_html = models.BooleanField(default=False)
+    has_xml = models.BooleanField(default=False)
     has_TEI = models.BooleanField(default=False)
     has_pdf_text = models.BooleanField(default=False)
     has_pdf_from_pages = models.BooleanField(default=False)
